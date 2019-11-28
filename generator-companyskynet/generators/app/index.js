@@ -201,7 +201,7 @@ class skynetGenerator extends Generator {
           {
             type: 'input',
             name: 'value',
-            message: 'What % of throttle capacity would you like to at the most for calls to the API?',
+            message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
             default: this.envData.safeThrottleLimit * 100,
             store: false,
           },
