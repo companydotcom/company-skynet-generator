@@ -5,7 +5,9 @@ The only files to edit are:
 4. 'services' folder to add any required service function files for the workers,
 5. 'tests' folder to add any unit tests, vsCode tests.
 6. 'database.config.json' file to add any specific settings that you would like
-  to have stored safely in our database and delivered to the worker files as 'serviceConfigData'
+  to have stored safely in our database and delivered to the worker files as
+  'serviceConfigData'. Once you have the file ready, just run 'npm run setupDatabase'
+  to setup the database.
 
 Of course, you can add any new npm packages required for the workers by using the 'npm i s <package>' command
 
