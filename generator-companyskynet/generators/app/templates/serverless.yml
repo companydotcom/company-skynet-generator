@@ -1,4 +1,4 @@
-service: techsupport-asi
+service: <%- serviceName %>
 
 plugins:
   - serverless-webpack

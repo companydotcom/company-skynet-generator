@@ -239,10 +239,6 @@ class skynetGenerator extends Generator {
         this.destinationPath('handler.js')
       );
       this.fs.copy(
-        this.templatePath('serverless.yml'),
-        this.destinationPath('serverless.yml')
-      );
-      this.fs.copy(
         this.templatePath('webpack.config.js'),
         this.destinationPath('webpack.config.js')
       );
@@ -267,6 +263,11 @@ class skynetGenerator extends Generator {
         this.templatePath('env.yml'),
         this.destinationPath('env.yml'),
         this.formatEnvToYml()
+      );
+      this.fs.copyTpl(
+        this.templatePath('serverless.yml'),
+        this.destinationPath('serverless.yml'),
+        { serviceName: this.envData.service}
       );
       mkdirp.sync(`${this.destinationRoot()}/tests`);
       mkdirp.sync(`${this.destinationRoot()}/services`);
