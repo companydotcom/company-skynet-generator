@@ -8,8 +8,8 @@ class skynetGenerator extends Generator {
     this.fixAppName = appname => appname.replace(/\s+/g, '-');
 
     this.proceed = true;
-    this.region = 'us-east-1';
-    this.accountId = 811255529278;
+    this.hasThrottleLimits = true;
+
     this.envData = {
       region: 'us-ease-1',
       accountId: 811255529278,
@@ -66,6 +66,7 @@ class skynetGenerator extends Generator {
       ]);
 
       if (throttleOn.value === false) {
+        this.hasThrottleLimits = false;
         return throttleLmts;
       }
 
@@ -180,6 +181,9 @@ class skynetGenerator extends Generator {
     };
 
     this.getSafeLimits = async () => {
+      if (this.hasThrottleLimits === false) {
+        return {};
+      }
       const toReturn = {};
       let value = 'x';
       while (isNaN(value) || value < 0 || value > 100) {
@@ -219,8 +223,6 @@ class skynetGenerator extends Generator {
       if (this.proceed === false) {
         return;
       }
-      this.envData.region = this.region;
-      this.envData.accountId = this.accountId;
       this.log(JSON.stringify(this.envData, null, 4));
       this.fs.copy(
         this.templatePath('workers/fetchWorker.js'),
