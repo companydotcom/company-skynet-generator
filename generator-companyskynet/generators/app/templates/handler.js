@@ -1,7 +1,5 @@
 import AWS from 'aws-sdk';
 
-AWS.config.update({ region: process.env.region });
-
 import {
   fetchHandler as fHandler,
   directTransitionHandler as dTHandler,
@@ -11,6 +9,9 @@ import {
 import fMsgHandler from './workers/fetchWorker';
 import tMsgHndlr from './workers/transitionWorker';
 
+AWS.config.update({ region: process.env.region });
+
+// eslint-disable-next-line arrow-body-style
 export const fetchHandler = async event => {
   return fHandler(
     AWS,
@@ -18,16 +19,17 @@ export const fetchHandler = async event => {
       throttleLmts: process.env.throttleLmts,
       safeThrottleLimit: process.env.safeThrottleLimit,
       reserveCapForDirect: process.env.reserveCapForDirect,
-      retryCntForCapacity: process.env.retryCntForCapacity
+      retryCntForCapacity: process.env.retryCntForCapacity,
     },
     process.env.region,
     process.env.service,
     process.env.accountId,
     event,
-    fMsgHandler
+    fMsgHandler,
   );
 };
 
+// eslint-disable-next-line arrow-body-style
 export const directTransitionHandler = async event => {
   return dTHandler(
     AWS,
@@ -35,16 +37,17 @@ export const directTransitionHandler = async event => {
       throttleLmts: process.env.throttleLmts,
       safeThrottleLimit: process.env.safeThrottleLimit,
       reserveCapForDirect: process.env.reserveCapForDirect,
-      retryCntForCapacity: process.env.retryCntForCapacity
+      retryCntForCapacity: process.env.retryCntForCapacity,
     },
     process.env.region,
     process.env.service,
     process.env.accountId,
     event,
-    tMsgHndlr
+    tMsgHndlr,
   );
 };
 
+// eslint-disable-next-line arrow-body-style
 export const bulkTransitionHandler = async event => {
   return bTHandler(
     AWS,
@@ -52,16 +55,17 @@ export const bulkTransitionHandler = async event => {
       throttleLmts: process.env.throttleLmts,
       safeThrottleLimit: process.env.safeThrottleLimit,
       reserveCapForDirect: process.env.reserveCapForDirect,
-      retryCntForCapacity: process.env.retryCntForCapacity
+      retryCntForCapacity: process.env.retryCntForCapacity,
     },
     process.env.region,
     process.env.service,
     process.env.accountId,
     event,
-    tMsgHndlr
+    tMsgHndlr,
   );
 };
 
+// eslint-disable-next-line arrow-body-style
 export const setupDatabase = async event => {
   return sDb(AWS, event, process.env.service);
-}
+};
