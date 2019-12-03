@@ -11,7 +11,7 @@ class skynetGenerator extends Generator {
     this.hasThrottleLimits = true;
 
     this.envData = {
-      region: 'us-ease-1',
+      region: 'us-east-1',
       accountId: 811255529278,
       reserveCapForDirect: 0.3,
       retryCntForCapacity: 3,
@@ -28,30 +28,36 @@ class skynetGenerator extends Generator {
         },
       ]);
       return answer.value;
-    }
+    };
 
-    this.getBasicAnswers = async () => {
-      return this.prompt([
-        {
-          type: 'input',
-          name: 'service',
-          message: 'Your service name',
-          default: this.fixAppName(this.appname),
-          store: false,
-        },
-        {
-          type: 'input',
-          name: 'productId',
-          message: 'Your productId',
-          store: false,
-        },
-        {
-          type: 'input',
-          name: 'tileId',
-          message: 'Your tileId',
-          store: false,
-        },
-      ]);
+
+    this.getBasicAnswers = async () => (this.prompt([
+      {
+        type: 'input',
+        name: 'service',
+        message: 'Your service name',
+        default: this.fixAppName(this.appname),
+        store: false,
+      },
+      {
+        type: 'input',
+        name: 'productId',
+        message: 'Your productId',
+        store: false,
+      },
+      {
+        type: 'input',
+        name: 'tileId',
+        message: 'Your tileId',
+        store: false,
+      },
+    ]));
+
+    const getNumericAnswer = async (ques, checkVar = 'value') => {
+      const value = await this.prompt([ques]);
+      // eslint-disable-next-line no-restricted-globals
+      return (isNaN(value[checkVar]) === false)
+        ? value : getNumericAnswer(ques);
     };
 
     this.getThrottleLimits = async () => {
@@ -80,20 +86,15 @@ class skynetGenerator extends Generator {
       ]);
 
       if (throttlePerDayOn.value === true) {
-        let value = 'x';
-        while (isNaN(value)) {
-          value = (await this.prompt([
-            {
-              type: 'input',
-              name: 'value',
-              message: 'What is the per day throttle limit  (enter only a number)?',
-              default: 0,
-              store: false,
-            },
-          ])).value;
-        }
+        const { value } = await getNumericAnswer({
+          type: 'input',
+          name: 'value',
+          message: 'What is the per day throttle limit  (enter only a number)?',
+          default: 0,
+          store: false,
+        });
         throttleLmts = {
-          ...throttleLmts, day: value
+          ...throttleLmts, day: value,
         };
       }
 
@@ -107,20 +108,15 @@ class skynetGenerator extends Generator {
       ]);
 
       if (throttlePerHourOn.value === true) {
-        let value = 'x';
-        while (isNaN(value)) {
-          value = (await this.prompt([
-            {
-              type: 'input',
-              name: 'value',
-              message: 'What is the per hour throttle limit (enter only a number)?',
-              default: 0,
-              store: false,
-            },
-          ])).value;
-        }
+        const { value } = await getNumericAnswer({
+          type: 'input',
+          name: 'value',
+          message: 'What is the per hour throttle limit (enter only a number)?',
+          default: 0,
+          store: false,
+        });
         throttleLmts = {
-          ...throttleLmts, hour: value
+          ...throttleLmts, hour: value,
         };
       }
 
@@ -134,20 +130,15 @@ class skynetGenerator extends Generator {
       ]);
 
       if (throttlePerMinOn.value === true) {
-        let value = 'x';
-        while (isNaN(value)) {
-          value = (await this.prompt([
-            {
-              type: 'input',
-              name: 'value',
-              message: 'What is the per minute throttle limit (enter only a number)?',
-              default: 0,
-              store: false,
-            },
-          ])).value;
-        }
+        const { value } = await getNumericAnswer({
+          type: 'input',
+          name: 'value',
+          message: 'What is the per minute throttle limit (enter only a number)?',
+          default: 0,
+          store: false,
+        });
         throttleLmts = {
-          ...throttleLmts, minute: value
+          ...throttleLmts, minute: value,
         };
       }
 
@@ -161,20 +152,15 @@ class skynetGenerator extends Generator {
       ]);
 
       if (throttlePerSecOn.value === true) {
-        let value = 'x';
-        while (isNaN(value)) {
-          value = (await this.prompt([
-            {
-              type: 'input',
-              name: 'value',
-              message: 'What is the per second throttle limit (enter only a number)?',
-              default: 0,
-              store: false,
-            },
-          ])).value;
-        }
+        const { value } = await getNumericAnswer({
+          type: 'input',
+          name: 'value',
+          message: 'What is the per second throttle limit (enter only a number)?',
+          default: 0,
+          store: false,
+        });
         throttleLmts = {
-          ...throttleLmts, second: value
+          ...throttleLmts, second: value,
         };
       }
       return { throttleLmts };
@@ -185,39 +171,29 @@ class skynetGenerator extends Generator {
         return {};
       }
       const toReturn = {};
-      let value = 'x';
-      while (isNaN(value) || value < 0 || value > 100) {
-        value = (await this.prompt([
-          {
-            type: 'input',
-            name: 'value',
-            message: 'What % of capacity would you like to reserve for direct calls to the API?',
-            default: this.envData.reserveCapForDirect * 100,
-            store: false,
-          },
-        ])).value;
-      }
-      toReturn.reserveCapForDirect = value / 100;
+      const { reserveCapForDirect } = await getNumericAnswer({
+        type: 'input',
+        name: 'reserveCapForDirect',
+        message: 'What % of capacity would you like to reserve for direct calls to the API?',
+        default: this.envData.reserveCapForDirect * 100,
+        store: false,
+      }, 'reserveCapForDirect');
+      toReturn.reserveCapForDirect = reserveCapForDirect / 100;
 
-      value = 'x';
-      while (isNaN(value) || value < 0 || value > 100) {
-        value = (await this.prompt([
-          {
-            type: 'input',
-            name: 'value',
-            message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
-            default: this.envData.safeThrottleLimit * 100,
-            store: false,
-          },
-        ])).value;
-      }
-      toReturn.safeThrottleLimit = value / 100;
+      const { safeThrottleLimit } = await getNumericAnswer({
+        type: 'input',
+        name: 'safeThrottleLimit',
+        message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
+        default: this.envData.safeThrottleLimit * 100,
+        store: false,
+      }, 'safeThrottleLimit');
+      toReturn.safeThrottleLimit = safeThrottleLimit / 100;
       return toReturn;
-    }
+    };
 
-    this.formatEnvToYml = () => {
-      return { ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts) };
-    }
+    this.formatEnvToYml = () => ({
+      ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts),
+    });
 
     this.finishProvisioning = () => {
       if (this.proceed === false) {
@@ -226,63 +202,58 @@ class skynetGenerator extends Generator {
       this.log(JSON.stringify(this.envData, null, 4));
       this.fs.copy(
         this.templatePath('workers/fetchWorker.js'),
-        this.destinationPath('workers/fetchWorker.js')
+        this.destinationPath('workers/fetchWorker.js'),
       );
       this.fs.copy(
         this.templatePath('workers/transitionWorker.js'),
-        this.destinationPath('workers/transitionWorker.js')
+        this.destinationPath('workers/transitionWorker.js'),
       );
       this.fs.copy(
         this.templatePath('database.config.json'),
-        this.destinationPath('database.config.json')
+        this.destinationPath('database.config.json'),
       );
       this.fs.copy(
         this.templatePath('handler.js'),
-        this.destinationPath('handler.js')
+        this.destinationPath('handler.js'),
       );
       this.fs.copy(
         this.templatePath('webpack.config.js'),
-        this.destinationPath('webpack.config.js')
+        this.destinationPath('webpack.config.js'),
       );
       this.fs.copy(
         this.templatePath('.eslintrc'),
-        this.destinationPath('.eslintrc')
+        this.destinationPath('.eslintrc'),
       );
       this.fs.copy(
         this.templatePath('.gitignore'),
-        this.destinationPath('.gitignore')
+        this.destinationPath('.gitignore'),
       );
       this.fs.copy(
         this.templatePath('README.md'),
-        this.destinationPath('README.md')
+        this.destinationPath('README.md'),
       );
       this.fs.copyTpl(
         this.templatePath('package.json'),
         this.destinationPath('package.json'),
-        { appName: this.envData.service }
+        { appName: this.envData.service },
       );
       this.fs.copyTpl(
         this.templatePath('env.yml'),
         this.destinationPath('env.yml'),
-        this.formatEnvToYml()
+        this.formatEnvToYml(),
       );
       this.fs.copyTpl(
         this.templatePath('serverless.yml'),
         this.destinationPath('serverless.yml'),
-        { serviceName: this.envData.service}
+        { serviceName: this.envData.service },
       );
       mkdirp.sync(`${this.destinationRoot()}/tests`);
       mkdirp.sync(`${this.destinationRoot()}/services`);
     };
   }
-
 }
 
 module.exports = class extends skynetGenerator {
-  constructor(args, opts) {
-    super(args, opts);
-  }
-
   async prompting() {
     if (await this.doWeStart() === false) {
       this.proceed = false;
@@ -293,14 +264,14 @@ module.exports = class extends skynetGenerator {
       ...this.envData,
       ...await this.getBasicAnswers(),
       ...await this.getThrottleLimits(),
-      ...await this.getSafeLimits()
+      ...await this.getSafeLimits(),
     };
+    return true;
   }
 
-  
   writing() {
     this.finishProvisioning();
-  };
+  }
 
   install() {
     this.npmInstall();
