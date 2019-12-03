@@ -31,7 +31,10 @@ provider:
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
-      Resource: "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.${self:custom.stage}.accountId}:table/apiCallCount"
+      Resource:
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.${self:custom.stage}.accountId}:table/apiCallCount"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.${self:custom.stage}.accountId}:table/Account"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.${self:custom.stage}.accountId}:table/vendorConfig"
     - Effect: "Allow"
       Action:
         - "sqs:GetQueueAttributes"
