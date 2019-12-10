@@ -173,6 +173,7 @@ resources:
             - "transition"
           requestQuantity:
             - "single"
+            - "exists": false
     subscribeBTSQSToTriggerSns:
       Type: 'AWS::SNS::Subscription'
       Properties:
