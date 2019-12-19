@@ -57,7 +57,17 @@ class skynetGenerator extends Generator {
       const value = await this.prompt([ques]);
       // eslint-disable-next-line no-restricted-globals
       return (isNaN(value[checkVar]) === false)
-        ? value : getNumericAnswer(ques);
+        ? value : getNumericAnswer(ques, checkVar);
+    };
+
+    const getPercentageAnswer = async (ques, checkVar = 'value') => {
+      const value = await this.prompt([ques]);
+      // eslint-disable-next-line no-restricted-globals
+      return (
+        isNaN(value[checkVar]) === false
+        && value[checkVar] >= 0
+        && value[checkVar] <= 100)
+        ? value : getPercentageAnswer(ques, checkVar);
     };
 
     this.getThrottleLimits = async () => {
@@ -171,7 +181,7 @@ class skynetGenerator extends Generator {
         return {};
       }
       const toReturn = {};
-      const { reserveCapForDirect } = await getNumericAnswer({
+      const { reserveCapForDirect } = await getPercentageAnswer({
         type: 'input',
         name: 'reserveCapForDirect',
         message: 'What % of capacity would you like to reserve for direct calls to the API?',
@@ -180,7 +190,7 @@ class skynetGenerator extends Generator {
       }, 'reserveCapForDirect');
       toReturn.reserveCapForDirect = reserveCapForDirect / 100;
 
-      const { safeThrottleLimit } = await getNumericAnswer({
+      const { safeThrottleLimit } = await getPercentageAnswer({
         type: 'input',
         name: 'safeThrottleLimit',
         message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
