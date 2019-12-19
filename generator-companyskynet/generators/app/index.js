@@ -27,7 +27,7 @@ class skynetGenerator extends Generator {
           store: false,
         },
       ]);
-      return answer.value;
+      return answer.start;
     };
 
 
@@ -274,6 +274,8 @@ module.exports = class extends skynetGenerator {
   }
 
   install() {
-    this.npmInstall();
+    if(this.proceed !== false) {
+      this.npmInstall();
+    }
   }
 };
