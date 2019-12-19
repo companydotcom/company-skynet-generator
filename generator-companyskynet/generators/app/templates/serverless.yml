@@ -73,11 +73,7 @@ functions:
       - sqs:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.${self:custom.stage}.accountId}:${self:custom.config.${self:custom.stage}.service}-directtq"
           enabled: true
-          batchSize: 1
-  bulkTransition:
-    handler: handler.bulkTransitionHandler
-    events:
-      - schedule: rate(1 minute)
+          batchSize: 1<%- bulkHandler %>
 
 ########## RESOURCES CONFIGURATION ##########
 resources:

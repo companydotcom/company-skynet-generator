@@ -9,6 +9,11 @@ class skynetGenerator extends Generator {
 
     this.proceed = true;
     this.hasThrottleLimits = true;
+    this.bulkHandlerEvent = `
+  bulkTransition:
+    handler: handler.bulkTransitionHandler
+    events:
+      - schedule: rate(1 minute)`;
 
     this.envData = {
       region: 'us-east-1',
@@ -201,6 +206,18 @@ class skynetGenerator extends Generator {
       return toReturn;
     };
 
+    this.isBulkEnabled = async () => {
+      const answer = await this.prompt([
+        {
+          type: 'confirm',
+          name: 'enabled',
+          message: 'Is your service expected to handle bulk requests for transitioning state?',
+          store: false,
+        },
+      ]);
+      return answer.enabled;
+    };
+
     this.formatEnvToYml = () => ({
       ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts),
     });
@@ -255,7 +272,10 @@ class skynetGenerator extends Generator {
       this.fs.copyTpl(
         this.templatePath('serverless.yml'),
         this.destinationPath('serverless.yml'),
-        { serviceName: this.envData.service },
+        {
+          serviceName: this.envData.service,
+          bulkHandler: this.bulkHandlerEvent,
+        },
       );
       mkdirp.sync(`${this.destinationRoot()}/tests`);
       mkdirp.sync(`${this.destinationRoot()}/services`);
@@ -276,6 +296,10 @@ module.exports = class extends skynetGenerator {
       ...await this.getThrottleLimits(),
       ...await this.getSafeLimits(),
     };
+
+    if(await this.isBulkEnabled() === false) {
+      this.bulkHandlerEvent = '';
+    }
     return true;
   }
 
