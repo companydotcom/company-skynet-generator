@@ -5,7 +5,7 @@ class skynetGenerator extends Generator {
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
-    this.fixAppName = appname => appname.replace(/\s+/g, '-');
+    this.fixAppName = appname => appname.replace(/\s+|_+/g, '-');
 
     this.proceed = true;
     this.hasThrottleLimits = true;
