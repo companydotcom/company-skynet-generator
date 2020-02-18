@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 const Generator = require('yeoman-generator');
 const mkdirp = require('mkdirp');
 
@@ -297,7 +298,7 @@ module.exports = class extends skynetGenerator {
       ...await this.getSafeLimits(),
     };
 
-    if(await this.isBulkEnabled() === false) {
+    if (await this.isBulkEnabled() === false) {
       this.bulkHandlerEvent = '';
     }
     return true;
@@ -308,7 +309,7 @@ module.exports = class extends skynetGenerator {
   }
 
   install() {
-    if(this.proceed !== false) {
+    if (this.proceed !== false) {
       this.npmInstall();
     }
   }
