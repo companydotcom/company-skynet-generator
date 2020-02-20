@@ -5,7 +5,11 @@ export default async ({
   // Service specific config data that was stored during initial setup will be
   // available in serviceConfigData. Any service specific user data that was
   // stored earlier will be available in serviceUserData
-  console.log(`transitionWorker: INFO: Received a call to work with message as ${JSON.stringify(message, null, 2)}, attributes as ${JSON.stringify(attributes, null, 2)}, service config data as ${JSON.stringify(serviceConfigData, null, 4)} and service specific user data as ${JSON.stringify(serviceUserData, null, 4)}`);
+  console.log('transitionWorker: INFO: Received a call to work.'); // CR: Mickey: breaking these up will make logs easier to read
+  console.log(`message => ${JSON.stringify(message, null, 2)})`);
+  console.log(`attributes => ${JSON.stringify(attributes, null, 2)},`);
+  console.log(`serviceConfigData => ${JSON.stringify(serviceConfigData, null, 4)}`);
+  console.log(`serviceUserData => ${JSON.stringify(serviceUserData, null, 4)}`);
   // Write all logic to perform the required work. Create other files for other
   // helpers as necessary, import and use them while keeping this file clean.
   // Do not worry about catching unless necessary for the business logic.
@@ -23,7 +27,9 @@ export default async ({
   // as a key in the return value object.
   switch (message.metadata.eventType) {
     case '':
+      // CR: Mickey: I've noted in skynet-core that a return of this shape is not handled properly.
       return {
+        // CR: Mickey: I'd lean towards renaming this "data" because there are so many other things already called "res" + "resp" in skynet-core/process.js
         res: 'Here is where you send the response data. This can also be an object',
         serviceUserData: {},
       };

@@ -10,7 +10,7 @@ The only files to edit are:
   to setup the database.
 
 Of course, you can add any new npm packages required for the workers by using the 'npm i s <package>' command
-
+## CR: Mickey: love that you have included this.
 Schema of the message that will be delivered to the worker:
 {
   "payload":{},
@@ -21,6 +21,7 @@ Schema of the message that will be delivered to the worker:
       "accountId": "xxxxxx",
       "userCUIs": [],
       "appointments": [],
+## CR: Mickey: can anyone tell me why products is returned in this format? it's very inconvenient
       "products": "[{productId=af62ded1-06e4-11e8-9306-120b17a64360, dateActivated=1574662799211, status=active}]",
       "mailboxFQDN": null,
       "mailbox": null,
@@ -163,3 +164,7 @@ Schema of the message attributes that will be delivered to the worker:
     "Value": "trigger"
   }
 }
+
+## CR: Mickey: maybe add note of what IamRoles at minimum are needed to be included in serverless.yml because they are 
+##     used by skynet-core?  Looks like they are just what are included in serverless.yml by default but it's probably
+##     worth a note that if you take any of them out nothing will work.
