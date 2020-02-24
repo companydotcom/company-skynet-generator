@@ -34,6 +34,7 @@ provider:
       Resource:
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/apiCallCount"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/Account"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/User"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/vendorConfig"
     - Effect: "Allow"
       Action:
