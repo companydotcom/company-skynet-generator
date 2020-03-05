@@ -220,7 +220,7 @@ class skynetGenerator extends Generator {
     };
 
     this.formatEnvToYml = () => ({
-      ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts),
+      ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts).replace(/"/g, "'"),
     });
 
     this.finishProvisioning = () => {
