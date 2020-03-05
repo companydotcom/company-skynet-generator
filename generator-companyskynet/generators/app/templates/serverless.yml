@@ -24,7 +24,7 @@ provider:
   stage: dev
   region: us-east-1
   accountId: 811255529278
-  environment: ${self:custom.config.${self:custom.stage}}
+  environment: ${self:custom.config}
   timeout: 900
   versionFunctions: false
   iamRoleStatements:
