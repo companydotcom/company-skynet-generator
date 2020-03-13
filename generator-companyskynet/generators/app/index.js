@@ -89,7 +89,7 @@ class skynetGenerator extends Generator {
 
       if (throttleOn.value === false) {
         this.hasThrottleLimits = false;
-        return throttleLmts;
+        return { throttleLmts };
       }
 
       const throttlePerDayOn = await this.prompt([
