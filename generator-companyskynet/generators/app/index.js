@@ -14,7 +14,7 @@ class skynetGenerator extends Generator {
   bulkTransition:
     handler: handler.bulkTransitionHandler
     events:
-      - schedule: rate(1 minute)`;
+      - schedule: rate(5 minutes)`;
 
     this.envData = {
       region: 'us-east-1',
