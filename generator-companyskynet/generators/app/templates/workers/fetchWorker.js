@@ -6,7 +6,7 @@ export default async ({
   // available in serviceConfigData. Any service specific user account data that
   // was stored earlier will be available in serviceAccountData. Similar is the
   // case with serviceUserData
-  console.log('transitionWorker: INFO: Received a call to work.');
+  console.log('fetchWorker: INFO: Received a call to work.');
   console.log(`message => ${JSON.stringify(message, null, 2)})`);
   console.log(`attributes => ${JSON.stringify(attributes, null, 2)},`);
   console.log(`serviceConfigData => ${JSON.stringify(serviceConfigData, null, 4)}`);
