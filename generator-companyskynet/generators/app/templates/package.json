@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.167.0",
-    "@companydotcom/company-skynet-core": "^1.0.16",
+    "@companydotcom/company-skynet-core": "^1.0.17",
     "s": "^1.0.0",
     "source-map-support": "^0.5.12"
   }
