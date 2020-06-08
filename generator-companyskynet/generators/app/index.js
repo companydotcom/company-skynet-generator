@@ -19,6 +19,7 @@ class skynetGenerator extends Generator {
     this.envData = {
       region: 'us-east-1',
       accountId: 811255529278,
+      stage: 'dev',
       reserveCapForDirect: 0.3,
       retryCntForCapacity: 3,
       safeThrottleLimit: 0.8,
