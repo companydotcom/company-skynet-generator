@@ -60,8 +60,12 @@ provider:
 ########## FUNCTIONS CONFIGURATION ##########
 functions:
   setupDatabase:
+    environment:
+      stage: ${self:custom.stage}
     handler: handler.setupDatabase
   directFetch:
+    environment:
+      stage: ${self:custom.stage}
     handler: handler.fetchHandler
     events:
       - sqs:
@@ -69,6 +73,8 @@ functions:
           enabled: true
           batchSize: 1
   directTransition:
+    environment:
+      stage: ${self:custom.stage}
     handler: handler.directTransitionHandler
     events:
       - sqs:

@@ -12,6 +12,8 @@ class skynetGenerator extends Generator {
     this.hasThrottleLimits = true;
     this.bulkHandlerEvent = `
   bulkTransition:
+    environment:
+      stage: \${self:custom.stage}
     handler: handler.bulkTransitionHandler
     events:
       - schedule: rate(5 minutes)`;
