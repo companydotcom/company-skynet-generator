@@ -33,6 +33,7 @@ export default async ({
         res: 'Here is where you send the response data. This can also be an object',
         serviceAccountData: {},
         serviceUserData: {},
+        // extraStatus: '', // custom status to send out in addition to the default pass/ fail for custom responders to catch. Add the key only if required
       };
     default:
       throw new Error(`fetchWorker: ERROR: metadata.eventType not recognized: ${message.metadata.eventType}`);
