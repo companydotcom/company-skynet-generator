@@ -81,6 +81,22 @@ functions:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"
           enabled: true
           batchSize: 1<%- bulkHandler %>
+  getHttp:
+    handler: handler.getHttpHandler
+    events:
+      - http:
+          path: "/http/operation/{operation}/eventType/{eventType}"
+          contentType: "application/json"
+          method: GET
+          cors: true        
+  postHttp:
+    handler: handler.postHttpHandler
+    events:
+      - http:
+          path: "/http/operation/{operation}/eventType/{eventType}"
+          contentType: "application/json"
+          method: POST
+          cors: true
 
 ########## RESOURCES CONFIGURATION ##########
 resources:
