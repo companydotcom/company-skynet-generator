@@ -1,3 +1,5 @@
+## Instructions
+
 The only files to edit are:
 1. 'env.yml' which has its own comments to describe the parameters,
 2. 'workers/fetchWorker' to implement the business logic of a fetch call,
@@ -11,9 +13,15 @@ The only files to edit are:
 
 Of course, you can add any new npm packages required for the workers by using the 'npm i s <package>' command
 
-Schema of the message that will be delivered to the worker:
+
+## Input Schemas
+
+Message that will be delivered to worker:
+```
 {
-  "payload":{},
+  "payload":{
+    // any custom data from triggering event
+  },
   "context": {
     "user": {
       "userId": "xxxxxx",
@@ -134,9 +142,11 @@ Schema of the message that will be delivered to the worker:
     "seqNo": null
   }
 }
+```
 
 
-Schema of the message attributes that will be delivered to the worker:
+Message attributes that will be delivered to the worker:
+```
 {
   "eventId": {
     "Type": "String",
@@ -163,3 +173,16 @@ Schema of the message attributes that will be delivered to the worker:
     "Value": "trigger"
   }
 }
+```
+
+
+## Output Options
+```
+{
+    res: 'Here is where you send the response data.         This can also be an object',
+    serviceAccountData: {}, // saved under vendorData[vendorSlug] on Account
+    serviceUserData: {}, // saved under vendorData[vendowSlug] on User
+    extraStatus: '', // custom status to send out in addition to the default pass/ fail for custom responders to catch. Add the key only if required
+    crmData: {}, // crm data is used to pass custom data directly to Salesforce or other configured crm providers.  Add key only if required.  Triggers skynet-core to send a crm event on event-bus with this data as the payload
+}
+```
