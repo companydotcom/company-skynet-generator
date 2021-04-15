@@ -71,7 +71,7 @@ functions:
       - sqs:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-fetchq"
           enabled: true
-          batchSize: 1
+          batchSize: 1<%- bulkFetchHandler %>
   directTransition:
     environment:
       stage: ${self:custom.stage}
@@ -80,7 +80,7 @@ functions:
       - sqs:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"
           enabled: true
-          batchSize: 1<%- bulkHandler %>
+          batchSize: 1<%- bulkTransitionHandler %>
   getHttp:
     handler: handler.getHttpHandler
     events:
@@ -134,6 +134,21 @@ resources:
               - "dlqCreate"
               - "Arn"
           maxReceiveCount: 2
+    bulkFQCreate:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        DelaySeconds: 0
+        MaximumMessageSize: 262144
+        MessageRetentionPeriod: 345600
+        QueueName: "${self:custom.config.service}-bulkfq"
+        ReceiveMessageWaitTimeSeconds: 0
+        VisibilityTimeout: 900
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - "dlqCreate"
+              - "Arn"
+          maxReceiveCount: 2
     directTQCreate:
       Type: "AWS::SQS::Queue"
       Properties:
@@ -177,6 +192,24 @@ resources:
             - ${self:custom.config.productId}
           eventType:
             - "fetch"
+          requestQuantity:
+            - "single"
+            - "exists": false
+    subscribeBFSQSToTriggerSns:
+      Type: "AWS::SNS::Subscription"
+      Properties:
+        TopicArn: "arn:aws:sns:${self:custom.region}:${self:custom.config.accountId}:event-bus"
+        Endpoint: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulkfq"
+        Protocol: sqs
+        FilterPolicy:
+          status:
+            - "trigger"
+          entityId:
+            - ${self:custom.config.productId}
+          eventType:
+            - "fetch"
+          requestQuantity:
+            - "bulk"
     subscribeDTSQSToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
@@ -229,5 +262,6 @@ resources:
                           - "event-bus"
         Queues:
           - Ref: fetchQCreate
+          - Ref: bulkFQCreate
           - Ref: directTQCreate
           - Ref: bulkQCreate

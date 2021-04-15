@@ -1,20 +1,39 @@
 import AWS from 'aws-sdk';
 
 import {
-  fetchHandler as fHandler,
+  fetchHandler as dFHandler,
+  bulkFetchHandler as bFHandler,
   directTransitionHandler as dTHandler,
   bulkTransitionHandler as bTHandler,
   setupDatabase as sDb,
   httpReqHandler,
 } from '@companydotcom/company-skynet-core';
 import fMsgHandler from './workers/fetchWorker';
-import tMsgHndlr from './workers/transitionWorker';
+import tMsgHandler from './workers/transitionWorker';
 
 AWS.config.update({ region: process.env.region });
 
 // eslint-disable-next-line arrow-body-style
 export const fetchHandler = async event => {
-  return fHandler(
+  return dFHandler(
+    AWS,
+    {
+      throttleLmts: process.env.throttleLmts,
+      safeThrottleLimit: process.env.safeThrottleLimit,
+      reserveCapForDirect: process.env.reserveCapForDirect,
+      retryCntForCapacity: process.env.retryCntForCapacity,
+    },
+    process.env.region,
+    process.env.service,
+    process.env.accountId,
+    event,
+    fMsgHandler,
+  );
+};
+
+// eslint-disable-next-line arrow-body-style
+export const bulkFetchHandler = async event => {
+  return bFHandler(
     AWS,
     {
       throttleLmts: process.env.throttleLmts,
@@ -44,7 +63,7 @@ export const directTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    tMsgHndlr,
+    tMsgHandler,
   );
 };
 
@@ -62,7 +81,7 @@ export const bulkTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    tMsgHndlr,
+    tMsgHandler,
   );
 };
 
