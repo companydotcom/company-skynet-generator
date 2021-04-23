@@ -259,6 +259,10 @@ class skynetGenerator extends Generator {
         this.destinationPath('workers/transitionWorker.js'),
       );
       this.fs.copy(
+        this.templatePath('workers/preWorkerHook.js'),
+        this.destinationPath('workers/preWorkerHook.js'),
+      );
+      this.fs.copy(
         this.templatePath('database.config.json'),
         this.destinationPath('database.config.json'),
       );

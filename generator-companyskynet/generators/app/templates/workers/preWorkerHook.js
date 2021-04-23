@@ -1,11 +1,15 @@
 /**
- * This method should only be used in very select cases to execute side effects or perform custom throttling on bulk operations.  A
- * Any messages that you remove from the array will not be executed in this run.
- * Non-bulk messages will be permanently ignored and will not be re-emitted as "handled".
- * Bulk messages will remain in the queue.  Do not use this hook to permanently ignore any messages.
- * @param {String} eventType fetch or transition
- * @param {Boolean} isBulk
- * @param {Array<Message>} messages Array of parsed SNS messages ready to be processed
- * @returns {Array<Message>} Messages to be passed to worker
+ * --- In most cases you can (& should) leave this as an empty function ---
+ * Only messages returned from the work will be processed.
+ * Direct messages that are not returned will be permanently ignored
+ * Bulk messages that are not returned will remain in the queue and reattempted the next execution
+ * DO NOT use this hook to filter types of events permanently
+ * DO use this hook to affect behavior based on current vendor status.  e.g. health check or custom throttling,
+ * or prioritize some messages over others
+ * @param {string} eventType one of "fetch" or "transition"
+ * @param {boolean} isBulk
+ * @param {number} availableCapacity previously computed allowed amount of throughput
+ * @param {Array.<Message>} messages candidate messages
  */
-export const preWorkerHook = (eventType, isBulk, messages = []) => messages;
+
+export default (eventType, isBulk, availableCapacity, messages) => messages;

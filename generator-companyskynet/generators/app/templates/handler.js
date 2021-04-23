@@ -10,6 +10,7 @@ import {
 } from '@companydotcom/company-skynet-core';
 import fMsgHandler from './workers/fetchWorker';
 import tMsgHandler from './workers/transitionWorker';
+import preWorkerHook from './workers/preWorkerHook';
 
 AWS.config.update({ region: process.env.region });
 
@@ -27,6 +28,7 @@ export const fetchHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
+    preWorkerHook,
     fMsgHandler,
   );
 };
@@ -45,6 +47,7 @@ export const bulkFetchHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
+    preWorkerHook,
     fMsgHandler,
   );
 };
@@ -63,6 +66,7 @@ export const directTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
+    preWorkerHook,
     tMsgHandler,
   );
 };
@@ -81,6 +85,7 @@ export const bulkTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
+    preWorkerHook,
     tMsgHandler,
   );
 };
