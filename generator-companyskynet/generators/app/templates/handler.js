@@ -28,8 +28,8 @@ export const fetchHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    preWorkerHook,
     fMsgHandler,
+    preWorkerHook,
   );
 };
 
@@ -47,8 +47,8 @@ export const bulkFetchHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    preWorkerHook,
     fMsgHandler,
+    preWorkerHook,
   );
 };
 
@@ -66,8 +66,8 @@ export const directTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    preWorkerHook,
     tMsgHandler,
+    preWorkerHook,
   );
 };
 
@@ -85,8 +85,8 @@ export const bulkTransitionHandler = async event => {
     process.env.service,
     process.env.accountId,
     event,
-    preWorkerHook,
     tMsgHandler,
+    preWorkerHook,
   );
 };
 

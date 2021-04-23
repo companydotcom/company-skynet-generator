@@ -8,8 +8,7 @@
  * or prioritize some messages over others
  * @param {string} eventType one of "fetch" or "transition"
  * @param {boolean} isBulk
- * @param {number} availableCapacity previously computed allowed amount of throughput
  * @param {Array.<Message>} messages candidate messages
  */
 
-export default (eventType, isBulk, availableCapacity, messages) => messages;
+export default (eventType, isBulk, messages) => messages;
