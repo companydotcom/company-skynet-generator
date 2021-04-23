@@ -10,11 +10,19 @@ class skynetGenerator extends Generator {
 
     this.proceed = true;
     this.hasThrottleLimits = true;
-    this.bulkHandlerEvent = `
+    this.bulkTransitionHandlerEvent = `
   bulkTransition:
     environment:
       stage: \${self:custom.stage}
     handler: handler.bulkTransitionHandler
+    events:
+      - schedule: rate(5 minutes)`;
+
+    this.bulkFetchHandlerEvent = `
+  bulkFetch:
+    environment:
+      stage: \${self:custom.stage}
+    handler: handler.bulkFetchHandler
     events:
       - schedule: rate(5 minutes)`;
 
@@ -209,12 +217,24 @@ class skynetGenerator extends Generator {
       return toReturn;
     };
 
-    this.isBulkEnabled = async () => {
+    this.isBulkTransitionEnabled = async () => {
       const answer = await this.prompt([
         {
           type: 'confirm',
           name: 'enabled',
           message: 'Is your service expected to handle bulk requests for transitioning state?',
+          store: false,
+        },
+      ]);
+      return answer.enabled;
+    };
+
+    this.isBulkFetchEnabled = async () => {
+      const answer = await this.prompt([
+        {
+          type: 'confirm',
+          name: 'enabled',
+          message: 'Is your service expected to handle bulk requests for fetch events?',
           store: false,
         },
       ]);
@@ -237,6 +257,10 @@ class skynetGenerator extends Generator {
       this.fs.copy(
         this.templatePath('workers/transitionWorker.js'),
         this.destinationPath('workers/transitionWorker.js'),
+      );
+      this.fs.copy(
+        this.templatePath('workers/preWorkerHook.js'),
+        this.destinationPath('workers/preWorkerHook.js'),
       );
       this.fs.copy(
         this.templatePath('database.config.json'),
@@ -277,7 +301,8 @@ class skynetGenerator extends Generator {
         this.destinationPath('serverless.yml'),
         {
           serviceName: this.envData.service,
-          bulkHandler: this.bulkHandlerEvent,
+          bulkTransitionHandler: this.bulkTransitionHandlerEvent,
+          bulkFetchHandler: this.bulkFetchHandlerEvent,
         },
       );
       mkdirp.sync(`${this.destinationRoot()}/tests`);
@@ -300,8 +325,12 @@ module.exports = class extends skynetGenerator {
       ...await this.getSafeLimits(),
     };
 
-    if (await this.isBulkEnabled() === false) {
-      this.bulkHandlerEvent = '';
+    if (await this.isBulkTransitionEnabled() === false) {
+      this.bulkTransitionHandlerEvent = '';
+    }
+
+    if (await this.isBulkFetchEnabled() === false) {
+      this.bulkFetchHandlerEvent = '';
     }
     return true;
   }
