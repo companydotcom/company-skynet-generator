@@ -43,6 +43,7 @@ provider:
         - "sqs:DeleteMessage"
       Resource:
         - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-fetchq"
+        - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulkfq"
         - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"
         - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulktq"
     - Effect: "Allow"
