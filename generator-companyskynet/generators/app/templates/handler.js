@@ -7,12 +7,11 @@ import {
   bulkTransitionHandler as bTHandler,
   setupDatabase as sDb,
   httpReqHandler,
-  webhookHdlr,
+  webhookHandler as wbkHdlr,
 } from '@companydotcom/company-skynet-core';
 import fMsgHandler from './workers/fetchWorker';
 import tMsgHandler from './workers/transitionWorker';
 import preWorkerHook from './workers/preWorkerHook';
-
 import webhookWorker from './workers/webhookWorker';
 
 AWS.config.update({ region: process.env.region });
@@ -93,7 +92,7 @@ export const bulkTransitionHandler = async event => {
   );
 };
 
-export const webhookHandler = async event => webhookHdlr(AWS,
+export const webhookHandler = async event => wbkHdlr(AWS,
   {}, process.env.region,
   process.env.service,
   process.env.accountId,

@@ -1,8 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
 const iamSqsResources = {
-  bulkFetch: '- "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulkfq"',
-  bulkTransition: '- "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulktq"',
-  webhook: '- "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-webhook"',
+  bulkFetch: `
+        - "arn:aws:sqs:\${self:custom.region}:\${self:custom.config.accountId}:\${self:custom.config.service}-bulkfq"`,
+  bulkTransition: `
+        - "arn:aws:sqs:\${self:custom.region}:\${self:custom.config.accountId}:\${self:custom.config.service}-bulktq"`,
+  webhook: `
+        - "arn:aws:sqs:\${self:custom.region}:\${self:custom.config.accountId}:\${self:custom.config.service}-webhook"`,
 };
 
 const functionConfigs = {
@@ -24,10 +27,10 @@ const functionConfigs = {
   webhook:
     environment:
       stage: \${self:custom.stage}
-    handler: handler.webhook
+    handler: handler.webhookHandler
     events:
       - sqs:
-          arn: "arn:aws:sqs:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:${''.concat('${self:custom.config.service}')}-webhook"
+          arn: "arn:aws:sqs:\${self:custom.region}:\${self:custom.region}:\${self:custom.config.service}-webhook"
           enabled: true
           batchSize: 1`,
 };
@@ -40,7 +43,7 @@ const resourceQueueConfigs = {
         DelaySeconds: 0
         MaximumMessageSize: 262144
         MessageRetentionPeriod: 345600
-        QueueName: "${''.concat('${self:custom.config.service}')}-bulkfq"
+        QueueName: "\${self:custom.config.service}-bulkfq"
         ReceiveMessageWaitTimeSeconds: 0
         VisibilityTimeout: 900
         RedrivePolicy:
@@ -56,7 +59,7 @@ const resourceQueueConfigs = {
         DelaySeconds: 0
         MaximumMessageSize: 262144
         MessageRetentionPeriod: 345600
-        QueueName: "${''.concat('${self:custom.config.service}')}-bulktq"
+        QueueName: "\${self:custom.config.service}-bulktq"
         ReceiveMessageWaitTimeSeconds: 0
         VisibilityTimeout: 900
         RedrivePolicy:
@@ -72,7 +75,7 @@ const resourceQueueConfigs = {
         DelaySeconds: 0
         MaximumMessageSize: 262144
         MessageRetentionPeriod: 345600
-        QueueName: "${''.concat('${self:custom.config.service}')}-webhook"
+        QueueName: "\${self:custom.config.service}-webhook"
         ReceiveMessageWaitTimeSeconds: 0
         VisibilityTimeout: 900
         RedrivePolicy:
@@ -88,14 +91,14 @@ const resourceSubscriptionConfigs = {
     subscribeFBQSToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
-        TopicArn: "arn:aws:sns:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:event-bus"
-        Endpoint: "arn:aws:sqs:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:${''.concat('${self:custom.config.service}')}-bulkfq"
+        TopicArn: "arn:aws:sns:\${self:custom.region}:\${self:custom.region}:event-bus"
+        Endpoint: "arn:aws:sqs:\${self:custom.region}:\${self:custom.region}:\${self:custom.config.service}-bulkfq"
         Protocol: sqs
         FilterPolicy:
           status:
             - "trigger"
           entityId:
-            - ${''.concat('${self:custom.config.productId}')}
+            - \${self:custom.config.productId}
           eventType:
             - "fetch"
           requestQuantity:
@@ -104,14 +107,14 @@ const resourceSubscriptionConfigs = {
     subscribeTBQSToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
-        TopicArn: "arn:aws:sns:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:event-bus"
-        Endpoint: "arn:aws:sqs:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:${''.concat('${self:custom.config.service}')}-bulktq"
+        TopicArn: "arn:aws:sns:\${self:custom.region}:\${self:custom.region}:event-bus"
+        Endpoint: "arn:aws:sqs:\${self:custom.region}:\${self:custom.region}:\${self:custom.config.service}-bulktq"
         Protocol: sqs
         FilterPolicy:
           status:
             - "trigger"
           entityId:
-            - ${''.concat('${self:custom.config.productId}')}
+            - \${self:custom.config.productId}
           eventType:
             - "transition"
           requestQuantity:
@@ -120,14 +123,14 @@ const resourceSubscriptionConfigs = {
     subscribeWebhookToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
-        TopicArn: "arn:aws:sns:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:event-bus"
-        Endpoint: "arn:aws:sqs:${''.concat('${self:custom.region}')}:${''.concat('${self:custom.config.accountId}')}:${''.concat('${self:custom.config.service}')}-webhook"
+        TopicArn: "arn:aws:sns:\${self:custom.region}:\${self:custom.region}:event-bus"
+        Endpoint: "arn:aws:sqs:\${self:custom.region}:\${self:custom.region}:\${self:custom.config.service}-webhook"
         Protocol: sqs
         FilterPolicy:
           status:
             - "trigger"
           entityId:
-            - ${''.concat('${self:custom.config.productId}')}
+            - \${self:custom.config.productId}
           eventType:
             - "webhook"
           requestQuantity:

@@ -21,7 +21,7 @@ export default async ({
   // It is the responsibility of the webhook worker to determine the platform user that a given webhook trigger is relevant to and issue the appropriate platform events.
   // webhook health events are not specific to a particular user
 
-  console.log('fetchWorker: INFO: Received a call to work.');
+  console.log('webhookWorker: INFO: Received a call to work.');
   console.log(`message => ${JSON.stringify(message, null, 2)})`);
   console.log(`attributes => ${JSON.stringify(attributes, null, 2)},`);
   console.log(`serviceConfigData => ${JSON.stringify(serviceConfigData, null, 4)}`);

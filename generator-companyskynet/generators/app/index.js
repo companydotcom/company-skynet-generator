@@ -139,16 +139,20 @@ class skynetGenerator extends Generator {
         this.destinationPath('tests/sampleMessage.json'),
         this.answers,
       );
-      mkdirp.sync(`${this.destinationRoot()}/tests`);
+      this.fs.copyTpl(
+        this.templatePath('.vscode/launch.json'),
+        this.destinationPath('.vscode/launch.json'),
+        this.answers,
+      );
       mkdirp.sync(`${this.destinationRoot()}/services`);
-      this.fs.copyTpl(this.templatePath(this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js'), this.destinationPath('workers/webhookWorker.js'));
+      this.fs.copyTpl(this.templatePath(this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js'),
+        this.destinationPath('workers/webhookWorker.js'));
     };
   }
 }
 
 module.exports = class extends skynetGenerator {
   async prompting() {
-    // this.doWeStart();
     this.answers = await this.prompt([
       { ...getServiceName, default: this.fixAppName(this.appname) },
       getProductId,
@@ -164,21 +168,6 @@ module.exports = class extends skynetGenerator {
       getSafeThrottleLimit,
       getEnableWebhook,
     ]);
-    this.answers = {
-      service: 'test',
-      productId: 'prod',
-      tileId: 'til',
-      whichThrottle: ['day', 'hour', 'minute', 'second'],
-      dayThrottleLimits: 1111,
-      hourThrottleLimits: 111,
-      minuteThrottleLimits: 11,
-      secondThrottleLimits: 1,
-      bulkFetch: false,
-      bulkTransition: false,
-      reserveCapForDirect: 30,
-      safeThrottleLimit: 23,
-      enableWebhook: false,
-    };
   }
 
   writing() {
