@@ -93,7 +93,7 @@ export const bulkTransitionHandler = async event => {
 };
 
 export const webhookHandler = async event => wbkHdlr(AWS,
-  {}, process.env.region,
+  process.env.region,
   process.env.service,
   process.env.accountId,
   event,

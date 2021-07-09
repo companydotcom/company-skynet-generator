@@ -1,4 +1,6 @@
-import { publishTransition, getUserByVendorId } from 'company-core';
+import { utils } from 'company-core';
+
+const { eventStream: { publishTransition }, getUserIdByVendorId } = utils;
 
 export default async ({
   message, attributes, serviceConfigData,
