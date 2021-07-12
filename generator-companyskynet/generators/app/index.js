@@ -168,6 +168,8 @@ module.exports = class extends skynetGenerator {
       getSafeThrottleLimit,
       getEnableWebhook,
     ]);
+    this.answers.safeThrottleLimit = this.answers.safeThrottleLimit ? this.answers.safeThrottleLimit / 100 : 0.8;
+    this.answers.reserveCapForDirect = this.answers.reserveCapForDirect ? this.answers.reserveCapForDirect / 100 : 0.3;
   }
 
   writing() {
