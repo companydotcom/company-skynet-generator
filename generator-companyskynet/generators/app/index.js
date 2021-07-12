@@ -1,6 +1,30 @@
 /* eslint-disable no-restricted-globals */
 const Generator = require('yeoman-generator');
 const mkdirp = require('mkdirp');
+const {
+  confirmStart,
+  getServiceName,
+  getProductId,
+  getTileId,
+  getWhatThrottles,
+  getDayThrottleLimits,
+  getHourThrottleLimits,
+  getSecondThrottleLimits,
+  getMinuteThrottleLimits,
+  getReserveCapForDirect,
+  getSafeThrottleLimit,
+  getIsBulkFetchEnabled,
+  getIsBulkTransitionEnabled,
+  getEnableWebhook,
+} = require('./prompts');
+
+const {
+  functionConfigs,
+  resourceQueueConfigs,
+  resourceSubscriptionConfigs,
+  queueRefPolicyConfigs,
+  iamSqsResources,
+} = require('./slsConfigOptions');
 
 class skynetGenerator extends Generator {
   constructor(args, opts) {
@@ -9,247 +33,49 @@ class skynetGenerator extends Generator {
     this.fixAppName = appname => appname.replace(/\s+|_+/g, '-');
 
     this.proceed = true;
-    this.hasThrottleLimits = true;
-    this.bulkTransitionHandlerEvent = `
-  bulkTransition:
-    environment:
-      stage: \${self:custom.stage}
-    handler: handler.bulkTransitionHandler
-    events:
-      - schedule: rate(5 minutes)`;
-
-    this.bulkFetchHandlerEvent = `
-  bulkFetch:
-    environment:
-      stage: \${self:custom.stage}
-    handler: handler.bulkFetchHandler
-    events:
-      - schedule: rate(5 minutes)`;
-
     this.envData = {
       region: 'us-east-1',
       accountId: 811255529278,
-      reserveCapForDirect: 0.3,
       retryCntForCapacity: 3,
-      safeThrottleLimit: 0.8,
     };
 
     this.doWeStart = async () => {
       const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'start',
-          message: 'Hi. Welcome to company skynet generator. Enter \'Y\' and hit \'Return\' to continue and answer a few questions to enable me to generate the project for you.',
-          store: false,
-        },
+        { ...confirmStart, default: this.fixAppName(this.appname) },
       ]);
       return answer.start;
     };
 
-
-    this.getBasicAnswers = async () => (this.prompt([
-      {
-        type: 'input',
-        name: 'service',
-        message: 'Your service name',
-        default: this.fixAppName(this.appname),
-        store: false,
-      },
-      {
-        type: 'input',
-        name: 'productId',
-        message: 'Your productId',
-        store: false,
-      },
-      {
-        type: 'input',
-        name: 'tileId',
-        message: 'Your tileId',
-        store: false,
-      },
-    ]));
-
-    const getNumericAnswer = async (ques, checkVar = 'value') => {
-      const value = await this.prompt([ques]);
-      // eslint-disable-next-line no-restricted-globals
-      return (isNaN(value[checkVar]) === false)
-        ? value : getNumericAnswer(ques, checkVar);
-    };
-
-    const getPercentageAnswer = async (ques, checkVar = 'value') => {
-      const value = await this.prompt([ques]);
-      // eslint-disable-next-line no-restricted-globals
-      return (
-        isNaN(value[checkVar]) === false
-        && value[checkVar] >= 0
-        && value[checkVar] <= 100)
-        ? value : getPercentageAnswer(ques, checkVar);
-    };
-
-    this.getThrottleLimits = async () => {
-      let throttleLmts = {};
-      const throttleOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttleOn.value === false) {
-        this.hasThrottleLimits = false;
-        return { throttleLmts };
-      }
-
-      const throttlePerDayOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per day throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerDayOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per day throttle limit  (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, day: value,
-        };
-      }
-
-      const throttlePerHourOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per hour throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerHourOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per hour throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, hour: value,
-        };
-      }
-
-      const throttlePerMinOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per minute throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerMinOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per minute throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, minute: value,
-        };
-      }
-
-      const throttlePerSecOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per second throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerSecOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per second throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, second: value,
-        };
-      }
-      return { throttleLmts };
-    };
-
-    this.getSafeLimits = async () => {
-      if (this.hasThrottleLimits === false) {
-        return {};
-      }
-      const toReturn = {};
-      const { reserveCapForDirect } = await getPercentageAnswer({
-        type: 'input',
-        name: 'reserveCapForDirect',
-        message: 'What % of capacity would you like to reserve for direct calls to the API?',
-        default: this.envData.reserveCapForDirect * 100,
-        store: false,
-      }, 'reserveCapForDirect');
-      toReturn.reserveCapForDirect = reserveCapForDirect / 100;
-
-      const { safeThrottleLimit } = await getPercentageAnswer({
-        type: 'input',
-        name: 'safeThrottleLimit',
-        message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
-        default: this.envData.safeThrottleLimit * 100,
-        store: false,
-      }, 'safeThrottleLimit');
-      toReturn.safeThrottleLimit = safeThrottleLimit / 100;
-      return toReturn;
-    };
-
-    this.isBulkTransitionEnabled = async () => {
-      const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'enabled',
-          message: 'Is your service expected to handle bulk requests for transitioning state?',
-          store: false,
-        },
-      ]);
-      return answer.enabled;
-    };
-
-    this.isBulkFetchEnabled = async () => {
-      const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'enabled',
-          message: 'Is your service expected to handle bulk requests for fetch events?',
-          store: false,
-        },
-      ]);
-      return answer.enabled;
-    };
-
     this.formatEnvToYml = () => ({
-      ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts).replace(/"/g, "'"),
+      serviceName: this.answers.service,
+      ...this.envData,
+      ...this.answers,
+      throttleLmts: JSON.stringify({
+        ...(this.answers.dayThrottleLimits ? { day: this.answers.dayThrottleLimits } : {}),
+        ...(this.answers.hourThrottleLimits ? { hour: this.answers.hourThrottleLimits } : {}),
+        ...(this.answers.minutesThrottleLimits ? { minutes: this.answers.minutesThrottleLimits } : {}),
+        ...(this.answers.secondThrottleLimits ? { second: this.answers.secondThrottleLimits } : {}),
+      }).replace(/"/g, "'"),
     });
 
     this.finishProvisioning = () => {
+      const getSlsConfigOptions = (configs, answers) => {
+        let slsString = '';
+        if (answers.bulkFetch) {
+          slsString = slsString.concat(configs.bulkFetch);
+        }
+        if (answers.bulkTransition) {
+          slsString = slsString.concat(configs.bulkTransition);
+        }
+        if (answers.enableWebhook) {
+          slsString = slsString.concat(configs.webhook);
+        }
+        return slsString;
+      };
+
       if (this.proceed === false) {
         return;
       }
-      this.log(JSON.stringify(this.envData, null, 4));
       this.fs.copy(
         this.templatePath('workers/fetchWorker.js'),
         this.destinationPath('workers/fetchWorker.js'),
@@ -289,7 +115,7 @@ class skynetGenerator extends Generator {
       this.fs.copyTpl(
         this.templatePath('package.json'),
         this.destinationPath('package.json'),
-        { appName: this.envData.service },
+        { appName: this.answers.service },
       );
       this.fs.copyTpl(
         this.templatePath('env.yml'),
@@ -300,48 +126,57 @@ class skynetGenerator extends Generator {
         this.templatePath('serverless.yml'),
         this.destinationPath('serverless.yml'),
         {
-          serviceName: this.envData.service,
-          bulkTransitionHandler: this.bulkTransitionHandlerEvent,
-          bulkFetchHandler: this.bulkFetchHandlerEvent,
+          serviceName: this.answers.service,
+          optionalIamSqsResources: getSlsConfigOptions(iamSqsResources, this.answers),
+          optionalFunctionConfigs: getSlsConfigOptions(functionConfigs, this.answers),
+          optionalQueueCreation: getSlsConfigOptions(resourceQueueConfigs, this.answers),
+          optionalQueueSubscriptions: getSlsConfigOptions(resourceSubscriptionConfigs, this.answers),
+          optionalQueuePolicies: getSlsConfigOptions(queueRefPolicyConfigs, this.answers),
         },
       );
-      mkdirp.sync(`${this.destinationRoot()}/tests`);
+      this.fs.copyTpl(
+        this.templatePath('tests/sampleMessage.json'),
+        this.destinationPath('tests/sampleMessage.json'),
+        this.answers,
+      );
+      this.fs.copyTpl(
+        this.templatePath('.vscode/launch.json'),
+        this.destinationPath('.vscode/launch.json'),
+        this.answers,
+      );
       mkdirp.sync(`${this.destinationRoot()}/services`);
+      this.fs.copyTpl(this.templatePath(this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js'),
+        this.destinationPath('workers/webhookWorker.js'));
     };
   }
 }
 
 module.exports = class extends skynetGenerator {
   async prompting() {
-    if (await this.doWeStart() === false) {
-      this.proceed = false;
-      return null;
-    }
-
-    this.envData = {
-      ...this.envData,
-      ...await this.getBasicAnswers(),
-      ...await this.getThrottleLimits(),
-      ...await this.getSafeLimits(),
-    };
-
-    if (await this.isBulkTransitionEnabled() === false) {
-      this.bulkTransitionHandlerEvent = '';
-    }
-
-    if (await this.isBulkFetchEnabled() === false) {
-      this.bulkFetchHandlerEvent = '';
-    }
-    return true;
+    this.answers = await this.prompt([
+      { ...getServiceName, default: this.fixAppName(this.appname) },
+      getProductId,
+      getTileId,
+      getWhatThrottles,
+      getDayThrottleLimits,
+      getHourThrottleLimits,
+      getMinuteThrottleLimits,
+      getSecondThrottleLimits,
+      getIsBulkFetchEnabled,
+      getIsBulkTransitionEnabled,
+      getReserveCapForDirect,
+      getSafeThrottleLimit,
+      getEnableWebhook,
+    ]);
+    this.answers.safeThrottleLimit = this.answers.safeThrottleLimit ? this.answers.safeThrottleLimit / 100 : 0.8;
+    this.answers.reserveCapForDirect = this.answers.reserveCapForDirect ? this.answers.reserveCapForDirect / 100 : 0.3;
   }
 
   writing() {
     this.finishProvisioning();
   }
 
-  install() {
-    if (this.proceed !== false) {
-      this.npmInstall();
-    }
+  end() {
+    this.log('Your service is now generated, please read the included README.md and comments for instructions on how to get started.');
   }
 };
