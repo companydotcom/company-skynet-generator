@@ -27,7 +27,7 @@ export default async ({
     throw new Error('Message did not have the required parameter metadata or parameter eventType within metadata');
   }
 
-  // Check what type of transition event has been requested and perform business
+  // Check what type of fetch event has been requested and perform business
   // logic based on the same.
   // If you would like to save any service specific or shared user data to database and
   // fetch it later, send a parameter `sharedMicroApplicationUserData` with scope, and serviceData
