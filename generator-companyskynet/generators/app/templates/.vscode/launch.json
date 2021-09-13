@@ -19,14 +19,7 @@
       "request": "launch",
       "name": "setupDatabase",
       "program": "${workspaceFolder}/node_modules/.bin/sls",
-      "args": [
-        "invoke",
-        "local",
-        "-f",
-        "setupDatabase",
-        "--path",
-        "database.config.json"
-      ]
+      "args": ["invoke", "local", "-f", "setupDatabase", "--path", "database.config.json"]
     },
     {
       "type": "node",
@@ -34,14 +27,7 @@
       "request": "launch",
       "name": "SAMPLE INVOKE",
       "program": "${workspaceFolder}/node_modules/.bin/sls",
-      "args": [
-        "invoke",
-        "local",
-        "-f",
-        "LAMBDA NAME HERE",
-        "--path",
-        "tests/sampleMessage.json"
-      ]
+      "args": ["invoke", "local", "-f", "LAMBDA NAME HERE", "--path", "tests/sampleMessage.json"]
     }
   ]
 }

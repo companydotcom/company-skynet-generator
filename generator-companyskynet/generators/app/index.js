@@ -30,7 +30,7 @@ class skynetGenerator extends Generator {
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
-    this.fixAppName = appname => appname.replace(/\s+|_+/g, '-');
+    this.fixAppName = (appname) => appname.replace(/\s+|_+/g, '-');
 
     this.proceed = true;
     this.envData = {
@@ -40,9 +40,7 @@ class skynetGenerator extends Generator {
     };
 
     this.doWeStart = async () => {
-      const answer = await this.prompt([
-        { ...confirmStart, default: this.fixAppName(this.appname) },
-      ]);
+      const answer = await this.prompt([{ ...confirmStart, default: this.fixAppName(this.appname) }]);
       return answer.start;
     };
 
@@ -76,64 +74,30 @@ class skynetGenerator extends Generator {
       if (this.proceed === false) {
         return;
       }
-      this.fs.copy(
-        this.templatePath('workers/fetchWorker.js'),
-        this.destinationPath('workers/fetchWorker.js'),
-      );
+      this.fs.copy(this.templatePath('workers/fetchWorker.js'), this.destinationPath('workers/fetchWorker.js'));
       this.fs.copy(
         this.templatePath('workers/transitionWorker.js'),
         this.destinationPath('workers/transitionWorker.js'),
       );
-      this.fs.copy(
-        this.templatePath('workers/preWorkerHook.js'),
-        this.destinationPath('workers/preWorkerHook.js'),
-      );
-      this.fs.copy(
-        this.templatePath('database.config.json'),
-        this.destinationPath('database.config.json'),
-      );
-      this.fs.copy(
-        this.templatePath('handler.js'),
-        this.destinationPath('handler.js'),
-      );
-      this.fs.copy(
-        this.templatePath('webpack.config.js'),
-        this.destinationPath('webpack.config.js'),
-      );
-      this.fs.copy(
-        this.templatePath('.eslintrc'),
-        this.destinationPath('.eslintrc'),
-      );
-      this.fs.copy(
-        this.templatePath('.gitignore'),
-        this.destinationPath('.gitignore'),
-      );
-      this.fs.copy(
-        this.templatePath('README.md'),
-        this.destinationPath('README.md'),
-      );
-      this.fs.copyTpl(
-        this.templatePath('package.json'),
-        this.destinationPath('package.json'),
-        { appName: this.answers.service },
-      );
-      this.fs.copyTpl(
-        this.templatePath('env.yml'),
-        this.destinationPath('env.yml'),
-        this.formatEnvToYml(),
-      );
-      this.fs.copyTpl(
-        this.templatePath('serverless.yml'),
-        this.destinationPath('serverless.yml'),
-        {
-          serviceName: this.answers.service,
-          optionalIamSqsResources: getSlsConfigOptions(iamSqsResources, this.answers),
-          optionalFunctionConfigs: getSlsConfigOptions(functionConfigs, this.answers),
-          optionalQueueCreation: getSlsConfigOptions(resourceQueueConfigs, this.answers),
-          optionalQueueSubscriptions: getSlsConfigOptions(resourceSubscriptionConfigs, this.answers),
-          optionalQueuePolicies: getSlsConfigOptions(queueRefPolicyConfigs, this.answers),
-        },
-      );
+      this.fs.copy(this.templatePath('workers/preWorkerHook.js'), this.destinationPath('workers/preWorkerHook.js'));
+      this.fs.copy(this.templatePath('database.config.json'), this.destinationPath('database.config.json'));
+      this.fs.copy(this.templatePath('handler.js'), this.destinationPath('handler.js'));
+      this.fs.copy(this.templatePath('webpack.config.js'), this.destinationPath('webpack.config.js'));
+      this.fs.copy(this.templatePath('.eslintrc'), this.destinationPath('.eslintrc'));
+      this.fs.copy(this.templatePath('.gitignore'), this.destinationPath('.gitignore'));
+      this.fs.copy(this.templatePath('README.md'), this.destinationPath('README.md'));
+      this.fs.copyTpl(this.templatePath('package.json'), this.destinationPath('package.json'), {
+        appName: this.answers.service,
+      });
+      this.fs.copyTpl(this.templatePath('env.yml'), this.destinationPath('env.yml'), this.formatEnvToYml());
+      this.fs.copyTpl(this.templatePath('serverless.yml'), this.destinationPath('serverless.yml'), {
+        serviceName: this.answers.service,
+        optionalIamSqsResources: getSlsConfigOptions(iamSqsResources, this.answers),
+        optionalFunctionConfigs: getSlsConfigOptions(functionConfigs, this.answers),
+        optionalQueueCreation: getSlsConfigOptions(resourceQueueConfigs, this.answers),
+        optionalQueueSubscriptions: getSlsConfigOptions(resourceSubscriptionConfigs, this.answers),
+        optionalQueuePolicies: getSlsConfigOptions(queueRefPolicyConfigs, this.answers),
+      });
       this.fs.copyTpl(
         this.templatePath('tests/sampleMessage.json'),
         this.destinationPath('tests/sampleMessage.json'),
@@ -145,8 +109,12 @@ class skynetGenerator extends Generator {
         this.answers,
       );
       mkdirp.sync(`${this.destinationRoot()}/services`);
-      this.fs.copyTpl(this.templatePath(this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js'),
-        this.destinationPath('workers/webhookWorker.js'));
+      this.fs.copyTpl(
+        this.templatePath(
+          this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js',
+        ),
+        this.destinationPath('workers/webhookWorker.js'),
+      );
     };
   }
 }
@@ -177,6 +145,8 @@ module.exports = class extends skynetGenerator {
   }
 
   end() {
-    this.log('Your service is now generated, please read the included README.md and comments for instructions on how to get started.');
+    this.log(
+      'Your service is now generated, please read the included README.md and comments for instructions on how to get started.',
+    );
   }
 };
