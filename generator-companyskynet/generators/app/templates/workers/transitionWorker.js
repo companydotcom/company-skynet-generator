@@ -4,8 +4,8 @@ export default async ({
   serviceConfigData,
   serviceAccountData,
   serviceUserData,
-  sharedServiceUserData,
-  sharedServiceAccountData,
+  sharedMicroApplicationUserData,
+  sharedMicroApplicationAccountData,
 }) => {
   // Look out for user data, account data, product data in message.context
   // Service specific config data that was stored during initial setup will be
@@ -48,6 +48,8 @@ export default async ({
         res: "Here is where you send the response data. This can also be an object",
         serviceAccountData: {},
         serviceUserData: {},
+        sharedMicroApplicationUserData: {},
+        sharedMicroApplicationAccountData: {},
         // extraStatus: '', // custom status to send out in addition to the default pass/ fail for custom responders to catch. Add the key only if required
         // crmData: {}, // crm data is used to pass custom data directly to Salesforce.  Add key only if required.
       };
