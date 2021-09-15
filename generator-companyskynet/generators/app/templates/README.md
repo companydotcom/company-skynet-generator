@@ -1,22 +1,23 @@
 ## Instructions
 
 The only files to edit are:
+
 1. 'env.yml' which has its own comments to describe the parameters,
 2. 'workers/fetchWorker' to implement the business logic of a fetch call,
 3. 'workers/transitionWorker' to implement the business logic of a transition call,
 4. 'services' folder to add any required service function files for the workers,
 5. 'tests' folder to add any unit tests, vsCode tests.
 6. 'database.config.json' file to add any specific settings that you would like
-  to have stored safely in our database and delivered to the worker files as
-  'serviceConfigData'. Once you have the file ready, just run 'npm run setupDatabase'
-  to setup the database.
+   to have stored safely in our database and delivered to the worker files as
+   'serviceConfigData'. Once you have the file ready, just run 'npm run setupDatabase'
+   to setup the database.
 
 Of course, you can add any new npm packages required for the workers by using the 'npm i s <package>' command
-
 
 ## Input Schemas
 
 Message that will be delivered to worker:
+
 ```
 {
   "payload":{
@@ -144,8 +145,8 @@ Message that will be delivered to worker:
 }
 ```
 
-
 Message attributes that will be delivered to the worker:
+
 ```
 {
   "eventId": {
@@ -175,8 +176,8 @@ Message attributes that will be delivered to the worker:
 }
 ```
 
-
 ## Output Options
+
 ```
 {
     res: 'Here is where you send the response data.         This can also be an object',

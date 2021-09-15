@@ -1,13 +1,15 @@
 // See: https://github.com/SBoudrias/Inquirer.js#question for documentation - this is the library yeoman uses under the hood
 
-const whenBulkInUse = ans => ans.bulkFetch || ans.bulkTransition;
+const whenBulkInUse = (ans) => ans.bulkFetch || ans.bulkTransition;
 
-const validateForPercentage = resp => (resp >= 0 && resp <= 100 && Number.isInteger(resp)) || 'Please enter a whole number between 0 and 100 (inclusive)';
+const validateForPercentage = (resp) =>
+  (resp >= 0 && resp <= 100 && Number.isInteger(resp)) || 'Please enter a whole number between 0 and 100 (inclusive)';
 
 const confirmStart = {
   type: 'confirm',
   name: 'start',
-  message: 'Hi. Welcome to company skynet generator. Enter \'Y\' and hit \'Return\' to continue and answer a few questions to enable me to generate the project for you.',
+  message:
+    "Hi. Welcome to company skynet generator. Enter 'Y' and hit 'Return' to continue and answer a few questions to enable me to generate the project for you.",
   store: false,
 };
 
@@ -45,7 +47,7 @@ const getDayThrottleLimits = {
   type: 'number',
   name: 'dayThrottleLimits',
   message: 'How many calls does the API allow per day?',
-  when: resp => resp.whichThrottle && resp.whichThrottle.includes('day'),
+  when: (resp) => resp.whichThrottle && resp.whichThrottle.includes('day'),
   store: false,
 };
 
@@ -53,7 +55,7 @@ const getHourThrottleLimits = {
   type: 'number',
   name: 'hourThrottleLimits',
   message: 'How many calls does the API allow per hour?',
-  when: resp => resp.whichThrottle && resp.whichThrottle.includes('hour'),
+  when: (resp) => resp.whichThrottle && resp.whichThrottle.includes('hour'),
   store: false,
 };
 
@@ -61,7 +63,7 @@ const getMinuteThrottleLimits = {
   type: 'number',
   name: 'minuteThrottleLimits',
   message: 'How many calls does the API allow per minute?',
-  when: resp => resp.whichThrottle && resp.whichThrottle.includes('minute'),
+  when: (resp) => resp.whichThrottle && resp.whichThrottle.includes('minute'),
   store: false,
 };
 
@@ -69,7 +71,7 @@ const getSecondThrottleLimits = {
   type: 'number',
   name: 'secondThrottleLimits',
   message: 'How many calls does the API allow per second?',
-  when: resp => resp.whichThrottle && resp.whichThrottle.includes('second'),
+  when: (resp) => resp.whichThrottle && resp.whichThrottle.includes('second'),
   store: false,
 };
 
@@ -90,7 +92,8 @@ const getIsBulkFetchEnabled = {
 const getReserveCapForDirect = {
   type: 'number',
   name: 'reserveCapForDirect',
-  message: 'What % of capacity would you like to reserve for direct calls to the API? (enter a whole number between 0 and 100)',
+  message:
+    'What % of capacity would you like to reserve for direct calls to the API? (enter a whole number between 0 and 100)',
   when: whenBulkInUse,
   validate: validateForPercentage,
   default: 30,
@@ -100,7 +103,8 @@ const getReserveCapForDirect = {
 const getSafeThrottleLimit = {
   type: 'number',
   name: 'safeThrottleLimit',
-  message: 'What % of throttle capacity would you like to hit at the most for calls to the API? (enter a whole number between 0 and 100)',
+  message:
+    'What % of throttle capacity would you like to hit at the most for calls to the API? (enter a whole number between 0 and 100)',
   when: whenBulkInUse,
   validate: validateForPercentage,
   default: 80,

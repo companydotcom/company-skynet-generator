@@ -17,7 +17,7 @@ import webhookWorker from './workers/webhookWorker';
 AWS.config.update({ region: process.env.region });
 
 // eslint-disable-next-line arrow-body-style
-export const fetchHandler = async event => {
+export const fetchHandler = async (event) => {
   return dFHandler(
     AWS,
     {
@@ -36,7 +36,7 @@ export const fetchHandler = async event => {
 };
 
 // eslint-disable-next-line arrow-body-style
-export const bulkFetchHandler = async event => {
+export const bulkFetchHandler = async (event) => {
   return bFHandler(
     AWS,
     {
@@ -55,7 +55,7 @@ export const bulkFetchHandler = async event => {
 };
 
 // eslint-disable-next-line arrow-body-style
-export const directTransitionHandler = async event => {
+export const directTransitionHandler = async (event) => {
   return dTHandler(
     AWS,
     {
@@ -74,7 +74,7 @@ export const directTransitionHandler = async event => {
 };
 
 // eslint-disable-next-line arrow-body-style
-export const bulkTransitionHandler = async event => {
+export const bulkTransitionHandler = async (event) => {
   return bTHandler(
     AWS,
     {
@@ -92,20 +92,16 @@ export const bulkTransitionHandler = async event => {
   );
 };
 
-export const webhookHandler = async event => wbkHdlr(AWS,
-  process.env.region,
-  process.env.service,
-  process.env.accountId,
-  event,
-  webhookWorker);
+export const webhookHandler = async (event) =>
+  wbkHdlr(AWS, process.env.region, process.env.service, process.env.accountId, event, webhookWorker);
 
 // eslint-disable-next-line arrow-body-style
-export const setupDatabase = async event => {
+export const setupDatabase = async (event) => {
   return sDb(AWS, event, process.env.service);
 };
 
 // eslint-disable-next-line arrow-body-style
-export const getHttpHandler = async event => {
+export const getHttpHandler = async (event) => {
   return httpReqHandler(
     AWS,
     process.env.region,
@@ -117,7 +113,7 @@ export const getHttpHandler = async event => {
 };
 
 // eslint-disable-next-line arrow-body-style
-export const postHttpHandler = async event => {
+export const postHttpHandler = async (event) => {
   return httpReqHandler(
     AWS,
     process.env.region,

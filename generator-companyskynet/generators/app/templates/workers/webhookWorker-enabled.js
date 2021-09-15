@@ -1,10 +1,11 @@
 import { utils } from 'company-core';
 
-const { eventStream: { publishTransition }, getUserIdByVendorId } = utils;
+const {
+  eventStream: { publishTransition },
+  getUserIdByVendorId,
+} = utils;
 
-export default async ({
-  message, attributes, serviceConfigData,
-}) => {
+export default async ({ message, attributes, serviceConfigData }) => {
   /*
     Expect your webhook worker to receive a semi-standardized message
     {
@@ -18,7 +19,7 @@ export default async ({
     }
   */
   /* Your webhook worker does not respect any throttle settings configured for your other workers.  If you need to contact your vendor's api - it is better to use the webhook worker to issue a fetch or transition event to do that request than perform it directly in this worker.
-  */
+   */
 
   // It is the responsibility of the webhook worker to determine the platform user that a given webhook trigger is relevant to and issue the appropriate platform events.
   // webhook health events are not specific to a particular user
@@ -33,8 +34,7 @@ export default async ({
   // Do not worry about catching errors unless necessary for the business logic.
 
   // Check if the type of fetch event is defined. Else, throw an error
-  if (typeof message.metadata === 'undefined'
-    || typeof message.metadata.eventType === 'undefined') {
+  if (typeof message.metadata === 'undefined' || typeof message.metadata.eventType === 'undefined') {
     throw new Error('Message did not have the required parameter metadata or parameter eventType within metadata');
   }
 
