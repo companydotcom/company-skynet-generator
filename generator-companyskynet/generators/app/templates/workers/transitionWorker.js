@@ -4,8 +4,8 @@ export default async ({
   serviceConfigData,
   serviceAccountData,
   serviceUserData,
-  privateMicroAppData,
-  publicMicroAppData
+  internalMicroAppData,
+  globalMicroAppData
 }) => {
   // Look out for user data, account data, product data in message.context
   // Service specific config data that was stored during initial setup will be
@@ -18,8 +18,8 @@ export default async ({
   console.log(`serviceConfigData => ${JSON.stringify(serviceConfigData, null, 4)}`);
   console.log(`serviceAccountData => ${JSON.stringify(serviceAccountData, null, 4)}`);
   console.log(`serviceUserData => ${JSON.stringify(serviceUserData, null, 4)}`);
-  console.log(`privateMicroAppData => ${JSON.stringify(privateMicroAppData, null, 4)}`);
-  console.log(`publicMicroAppData => ${JSON.stringify(publicMicroAppData, null, 4)}`);
+  console.log(`internalMicroAppData => ${JSON.stringify(internalMicroAppData, null, 4)}`);
+  console.log(`globalMicroAppData => ${JSON.stringify(globalMicroAppData, null, 4)}`);
 
   // Write all logic to perform the required work. Create other files for other
   // helpers as necessary, import and use them while keeping this file clean.
@@ -32,7 +32,7 @@ export default async ({
 
   // Check what type of transition event has been requested and perform business
   // logic based on the same.
-  // Use microAppData to store service specific data either privately to Users and Accounts of this Micro App or
+  // Use microAppData to store service specific data either internally to Users and Accounts of this Micro App or
   // publicly to any other Micro App on the platform. See docs for more information:
   // https://www.notion.so/companycorp/Micro-Application-Data-Store-MADS-2493a9efdaaf4f2ea3cc4eff96f92f06#29a1cdc82ed44c5cbf4f38327819ace2
   switch (message.metadata.eventType) {

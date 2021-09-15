@@ -4,8 +4,8 @@ export default async ({
   serviceConfigData,
   serviceAccountData,
   serviceUserData,
-  privateMicroAppData,
-  publicMicroAppData
+  internalMicroAppData,
+  globalMicroAppData
 }) => {
   // Look out for user data, account data, product data in message.context
   // Service specific config data that was stored during initial setup will be
@@ -18,8 +18,8 @@ export default async ({
   console.log(`serviceConfigData => ${JSON.stringify(serviceConfigData, null, 4)}`);
   console.log(`serviceAccountData => ${JSON.stringify(serviceAccountData, null, 4)}`);
   console.log(`serviceUserData => ${JSON.stringify(serviceUserData, null, 4)}`);
-  console.log(`privateMicroAppData => ${JSON.stringify(privateMicroAppData, null, 4)}`);
-  console.log(`publicMicroAppData => ${JSON.stringify(publicMicroAppData, null, 4)}`);
+  console.log(`internalMicroAppData => ${JSON.stringify(internalMicroAppData, null, 4)}`);
+  console.log(`globalMicroAppData => ${JSON.stringify(globalMicroAppData, null, 4)}`);
   // Write all logic to perform the required work. Create other files for other
   // helpers as necessary, import and use them while keeping this file clean.
   // Do not worry about catching errors unless necessary for the business logic.
