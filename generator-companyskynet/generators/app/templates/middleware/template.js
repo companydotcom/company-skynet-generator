@@ -23,7 +23,7 @@
  * @returns
  */
 export default options => {
-  const middlewareName = <%- middlewareName %>;
+  const middlewareName = '<%- middlewareName %>';
   /**
    * This code will be executed before your worker.  To supply additional data with your message to the worker, assign it to the skynet message object
    * @param {Array<SkynetMessage>} request.event

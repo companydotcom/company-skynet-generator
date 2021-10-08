@@ -30,6 +30,10 @@ const {
   iamSqsResources,
 } = require('./slsConfigOptions');
 
+const {
+  generateMiddlewareIndex,
+} = require('./handleMiddleware');
+
 class skynetGenerator extends Generator {
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
@@ -62,28 +66,26 @@ class skynetGenerator extends Generator {
 
     this.getCurrentMiddlewareNames = () => {
       const middlewareFiles = fs.readdirSync(this.destinationPath('middleware'));
-      return middlewareFiles.filter(fileName => fileName !== 'index.js')
+      return middlewareFiles.filter(fileName => fileName !== 'index.js').map(file => file.split('.')[0]);
     }
 
     this.addMiddleware = () => {
-      if (!fs.existsSync(this.destinationRoot('/middleware'))) {
-        mkdirp.sync(this.destinationRoot('/middleware'));
-      }
-      if (this.answers.newCustom) {
+      if (this.answers.getMiddlewareName) {
         this.fs.copyTpl(
           this.templatePath(
-            'middleware/template.txt',
+            'middleware/template.js',
           ),
-          this.destinationPath(`middleware/${this.answers.newCustom}.js`, {
-            middlewareName: this.answers.newCustom,
-          }),
+          this.destinationPath(`middleware/${this.answers.getMiddlewareName}.js`),
+          {
+            middlewareName: this.answers.getMiddlewareName,
+          },
         );
       }
       this.fs.copyTpl(
         this.templatePath(
           'middleware/index.txt',
         ),
-        this.destinationPath('middleware/index.js', generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || [])),
+        this.destinationPath('middleware/index.js'), generateMiddlewareIndex([...this.getCurrentMiddlewareNames(), this.answers.getMiddlewareName], this.answers.chooseExistingMiddleware || []),
       );
     };
 
@@ -111,7 +113,7 @@ class skynetGenerator extends Generator {
         this.destinationPath('workers/transitionWorker.js'),
       );
       this.fs.copy(this.templatePath('database.config.json'), this.destinationPath('database.config.json'));
-      this.fs.copy(this.templatePath('handler.js'), this.destinationPath('handler.js'));
+      this.fs.copyTpl(this.templatePath('handler.js'), this.destinationPath('handler.js'), { throttlingOn: this.answers.whichThrottle && this.answers.whichThrottle.length !== 0 ? true : false });
       this.fs.copy(this.templatePath('webpack.config.js'), this.destinationPath('webpack.config.js'));
       this.fs.copy(this.templatePath('.eslintrc.js'), this.destinationPath('.eslintrc.js'));
       this.fs.copy(this.templatePath('.gitignore'), this.destinationPath('.gitignore'));
@@ -150,7 +152,7 @@ class skynetGenerator extends Generator {
         this.templatePath(
           'middleware/index.txt',
         ),
-        this.destinationPath('middleware/index.js', generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || [])),
+        this.destinationPath('middleware/index.js'), generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || []),
       );
     };
   }
@@ -164,7 +166,7 @@ module.exports = class extends skynetGenerator {
       confirmStart,
       checkExisting,
     ] : [confirmStart]);
-    console.log('this.startUp', this.startUp)
+
     if (this.startUp.start) {
       if (!preExistingService || this.startUp.generateFullService === 'Generate Full Service') {
         this.type = 'fullService';

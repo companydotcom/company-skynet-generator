@@ -20,7 +20,7 @@ const sharedSkynetConfig = {
   region,
   service,
   account: accountId,
-  useThrottling: false,
+  useThrottling: <%- throttlingOn %>,
   throttleOptions: {
     throttleLmts,
     safeThrottleLimit,

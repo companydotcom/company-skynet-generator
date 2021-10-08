@@ -5,15 +5,14 @@ module.exports.getAvailableMiddleware = () => {
   return middlewareNames;
 }
 
-const defaultMiddlewareSettings = `     {
+const defaultMiddlewareSettings = ` {
       isBulk: [true, false],
       eventType: [\'fetch\', \'transition\', \'webhook\'],
-    },
-`
+    },`
 
 module.exports.generateMiddlewareIndex = (customMiddlewareNames, skynetMiddlewareInUse) => {
-  const imports = ``;
-  const exports = [];
+  let imports = ``;
+  let exports = '';
   if (skynetMiddlewareInUse.length) {
     imports = imports.concat(`import { middleware } from '@companydotcom/company-skynet-core'\n`)
   }
@@ -31,11 +30,14 @@ module.exports.generateMiddlewareIndex = (customMiddlewareNames, skynetMiddlewar
   });
 
   customMiddlewareNames.forEach((name) => {
-    exports.push({
-      middleware: name,
-      settings: defaultMiddlewareSettings,
-    });
+    exports = exports.concat(`  {
+    middleware: ${name},
+    settings: ${defaultMiddlewareSettings}
+  },
+`);
   });
+  console.log('imports', imports);
+  console.log('exports', exports);
 
   return {
     imports,
