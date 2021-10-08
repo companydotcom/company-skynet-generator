@@ -16,6 +16,7 @@ const {
   getIsBulkFetchEnabled,
   getIsBulkTransitionEnabled,
   getEnableWebhook,
+  checkExisting,
 } = require('./prompts');
 
 const {
@@ -55,6 +56,33 @@ class skynetGenerator extends Generator {
         ...(this.answers.secondThrottleLimits ? { second: this.answers.secondThrottleLimits } : {}),
       }).replace(/"/g, "'"),
     });
+
+    this.getCurrentMiddlewareNames = () => {
+      const middlewareFiles = fs.readdirSync(this.destinationPath('middleware'));
+      return middlewareFiles.filter(fileName => fileName !== 'index.js')
+    }
+
+    this.addMiddleware = () => {
+      if (!fs.existsSync(this.destinationRoot('/middleware'))) {
+        mkdirp.sync(this.destinationRoot('/middleware'));
+      }
+      if (this.answers.newCustom) {
+        this.fs.copyTpl(
+          this.templatePath(
+            'middleware/template.txt',
+          ),
+          this.destinationPath(`middleware/${this.answers.newCustom}.js`, {
+            middlewareName: this.answers.newCustom,
+          }),
+        );
+      }
+      this.fs.copyTpl(
+        this.templatePath(
+          'middleware/index.txt',
+        ),
+        this.destinationPath('middleware/index.js', generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || [])),
+      );
+    };
 
     this.finishProvisioning = () => {
       const getSlsConfigOptions = (configs, answers) => {
@@ -115,33 +143,71 @@ class skynetGenerator extends Generator {
         ),
         this.destinationPath('workers/webhookWorker.js'),
       );
+      mkdirp.sync(`${this.destinationRoot()}/middleware`);
+      this.fs.copyTpl(
+        this.templatePath(
+          'middleware/index.txt',
+        ),
+        this.destinationPath('middleware/index.js', generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || [])),
+      );
     };
   }
 }
 
 module.exports = class extends skynetGenerator {
   async prompting() {
-    this.answers = await this.prompt([
-      { ...getServiceName, default: this.fixAppName(this.appname) },
-      getProductId,
-      getTileId,
-      getWhatThrottles,
-      getDayThrottleLimits,
-      getHourThrottleLimits,
-      getMinuteThrottleLimits,
-      getSecondThrottleLimits,
-      getIsBulkFetchEnabled,
-      getIsBulkTransitionEnabled,
-      getReserveCapForDirect,
-      getSafeThrottleLimit,
-      getEnableWebhook,
-    ]);
-    this.answers.safeThrottleLimit = this.answers.safeThrottleLimit ? this.answers.safeThrottleLimit / 100 : 0.8;
-    this.answers.reserveCapForDirect = this.answers.reserveCapForDirect ? this.answers.reserveCapForDirect / 100 : 0.3;
+    const preExistingService = this.fs.existsSync(this.destinationPath('package.json'));
+
+    this.startUp = await this.prompt(preExistingService ? [
+      confirmStart,
+      checkExisting,
+    ] : [confirmStart]);
+
+    if (this.startUp.start) {
+      if (this.startUp.generateFullService === 'Generate Full Service') {
+        this.type = 'fullService';
+        this.answers = await this.prompt([
+          { ...getServiceName, default: this.fixAppName(this.appname) },
+          getProductId,
+          getTileId,
+          getWhatThrottles,
+          getDayThrottleLimits,
+          getHourThrottleLimits,
+          getMinuteThrottleLimits,
+          getSecondThrottleLimits,
+          getIsBulkFetchEnabled,
+          getIsBulkTransitionEnabled,
+          getReserveCapForDirect,
+          getSafeThrottleLimit,
+          getEnableWebhook,
+          chooseExistingMiddleware,
+        ]);
+        this.answers.safeThrottleLimit = this.answers.safeThrottleLimit ? this.answers.safeThrottleLimit / 100 : 0.8;
+        this.answers.reserveCapForDirect = this.answers.reserveCapForDirect ? this.answers.reserveCapForDirect / 100 : 0.3;
+      } else if (this.startUp.generateFullService === 'Add Custom Middleware') {
+        this.type = 'middleware';
+        this.answers = await this.prompt([
+          chooseExistingMiddleware,
+          getMiddlewareName,
+        ]);
+      }
+    } else {
+      this.type = 'none';
+    }
   }
 
+
   writing() {
-    this.finishProvisioning();
+    switch(this.type) {
+      case 'fullService':
+        this.finishProvisioning();
+        break;
+      case 'middleware':
+        this.addMiddleware();
+        break;
+      default:
+        break;
+    }
   }
 
   end() {
