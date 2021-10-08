@@ -1,6 +1,6 @@
-import { middleware } from '@companydotcom/company-skynet-core';
+const { middleware } = require('@companydotcom/company-skynet-core');
 
-export const getAvailableMiddleware = () => {
+module.exports.getAvailableMiddleware = () => {
   const middlewareNames = Object.keys(middleware);
   return middlewareNames;
 }
@@ -11,7 +11,7 @@ const defaultMiddlewareSettings = `     {
     },
 `
 
-export const generateMiddlewareIndex = (customMiddlewareNames, skynetMiddlewareInUse) => {
+module.exports.generateMiddlewareIndex = (customMiddlewareNames, skynetMiddlewareInUse) => {
   const imports = ``;
   const exports = [];
   if (skynetMiddlewareInUse.length) {

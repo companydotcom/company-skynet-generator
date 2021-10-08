@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-globals */
 const Generator = require('yeoman-generator');
+const fs = require('fs');
 const mkdirp = require('mkdirp');
 const {
   confirmStart,
@@ -17,6 +18,8 @@ const {
   getIsBulkTransitionEnabled,
   getEnableWebhook,
   checkExisting,
+  chooseExistingMiddleware,
+  getMiddlewareName,
 } = require('./prompts');
 
 const {
@@ -107,11 +110,10 @@ class skynetGenerator extends Generator {
         this.templatePath('workers/transitionWorker.js'),
         this.destinationPath('workers/transitionWorker.js'),
       );
-      this.fs.copy(this.templatePath('workers/preWorkerHook.js'), this.destinationPath('workers/preWorkerHook.js'));
       this.fs.copy(this.templatePath('database.config.json'), this.destinationPath('database.config.json'));
       this.fs.copy(this.templatePath('handler.js'), this.destinationPath('handler.js'));
       this.fs.copy(this.templatePath('webpack.config.js'), this.destinationPath('webpack.config.js'));
-      this.fs.copy(this.templatePath('.eslintrc'), this.destinationPath('.eslintrc'));
+      this.fs.copy(this.templatePath('.eslintrc.js'), this.destinationPath('.eslintrc.js'));
       this.fs.copy(this.templatePath('.gitignore'), this.destinationPath('.gitignore'));
       this.fs.copy(this.templatePath('README.md'), this.destinationPath('README.md'));
       this.fs.copyTpl(this.templatePath('package.json'), this.destinationPath('package.json'), {
@@ -156,15 +158,15 @@ class skynetGenerator extends Generator {
 
 module.exports = class extends skynetGenerator {
   async prompting() {
-    const preExistingService = this.fs.existsSync(this.destinationPath('package.json'));
+    const preExistingService = fs.existsSync(this.destinationPath('package.json'));
 
     this.startUp = await this.prompt(preExistingService ? [
       confirmStart,
       checkExisting,
     ] : [confirmStart]);
-
+    console.log('this.startUp', this.startUp)
     if (this.startUp.start) {
-      if (this.startUp.generateFullService === 'Generate Full Service') {
+      if (!preExistingService || this.startUp.generateFullService === 'Generate Full Service') {
         this.type = 'fullService';
         this.answers = await this.prompt([
           { ...getServiceName, default: this.fixAppName(this.appname) },
