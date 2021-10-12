@@ -136,7 +136,7 @@ const chooseExistingMiddleware = {
 const getMiddlewareName = {
   type: 'input',
   name: 'getMiddlewareName',
-  message: 'What would  you like to name your middleware?'
+  message: 'What would you like to name your middleware?'
 };
 
 module.exports = {
