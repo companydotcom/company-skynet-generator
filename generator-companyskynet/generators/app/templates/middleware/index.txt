@@ -1,0 +1,22 @@
+<%- imports %>
+
+/*
+  Use this file to organize custom middleware and additional middleware imported from skynet-core.
+
+  Use the "settings" field to set under which execution states your middleware should be run.
+
+  To run a middleware for all message types set settings to:
+  {
+    isBulk: [true, false],
+    eventType: ['fetch', 'transition', 'webhook'],
+  }
+  to exclude an eventType or single/bulk group, remove its value from the appropriate array.
+
+  To utilize additional features from skynet core:
+   - import a named middleware from the documentation, such as "withCrmData"
+   - add a entry in the "microApplicationMiddleware" array with the import as the "middleware" property
+   - use the "settings" field as described above
+*/
+
+export const microApplicationMiddleware = [
+<%- exports %>];
