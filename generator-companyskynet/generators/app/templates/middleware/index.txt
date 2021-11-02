@@ -1,5 +1,4 @@
 <%- imports %>
-
 /*
   Use this file to organize custom middleware and additional middleware imported from skynet-core.
 

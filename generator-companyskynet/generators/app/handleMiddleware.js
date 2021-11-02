@@ -26,7 +26,7 @@ module.exports.generateMiddlewareIndex = (customMiddlewareNames, skynetMiddlewar
   });
 
   customMiddlewareNames.forEach((name) => {
-    imports = imports.concat(`import { ${name} } from './${name}'\n`);
+    imports = imports.concat(`import ${name} from './${name}'\n`);
   });
 
   customMiddlewareNames.forEach((name) => {
