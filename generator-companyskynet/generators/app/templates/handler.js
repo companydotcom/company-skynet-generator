@@ -31,7 +31,7 @@ const sharedSkynetConfig = {
 };
 
 const determineMiddleware = (allMiddleware, eventType, isBulk) => {
-  allMiddleware.reduce((midToUse, { middleware, settings }) => {
+  return allMiddleware.reduce((midToUse, { middleware, settings }) => {
     if (settings.isBulk && !settings.isBulk.includes(isBulk)) {
       return midToUse;
     }
