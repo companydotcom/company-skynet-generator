@@ -42,13 +42,18 @@
         "Message": {
           "payload": {},
           "context": {
-            "user": {},
-            "account": {},
+            "user": {
+              "userId": "dummy",
+              "accountId": "dummy"
+            },
+            "account": {
+              "accountId": "dummy"
+            },
             "product": {},
             "tile": {}
           },
           "metadata": {
-            "eventType": "/* EVENT NAME */",
+            "eventType": "health",
             "tileId": "<%- tileId %>",
             "stateCurrent": "",
             "statePrevious": ""
