@@ -43,7 +43,7 @@ class skynetGenerator extends Generator {
     this.proceed = true;
     this.envData = {
       region: 'us-east-1',
-      accountId: 811255529278,
+      accountId: 254150672415,
       retryCntForCapacity: 3,
     };
 
