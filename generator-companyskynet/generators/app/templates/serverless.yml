@@ -20,7 +20,7 @@ custom:
 ########## PROVIDER CONFIGURATION ##########
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs14.x
   stage: dev
   region: us-east-1
   accountId: 811255529278
