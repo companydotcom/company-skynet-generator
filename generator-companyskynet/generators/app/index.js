@@ -61,7 +61,7 @@ class skynetGenerator extends Generator {
         ...(this.answers.hourThrottleLimits ? { hour: this.answers.hourThrottleLimits } : {}),
         ...(this.answers.minutesThrottleLimits ? { minutes: this.answers.minutesThrottleLimits } : {}),
         ...(this.answers.secondThrottleLimits ? { second: this.answers.secondThrottleLimits } : {}),
-      }).replace(/"/g, "'"),
+      }).replace(/'/g, '"'),
     });
 
     this.getCurrentMiddlewareNames = () => {
