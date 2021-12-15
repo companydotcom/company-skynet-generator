@@ -20,10 +20,10 @@ custom:
 ########## PROVIDER CONFIGURATION ##########
 provider:
   name: aws
-  runtime: nodejs10.x
-  stage: dev
+  runtime: nodejs14.x
+  stage: plat
   region: us-east-1
-  accountId: 811255529278
+  accountId: 254150672415
   environment: ${self:custom.config}
   timeout: 900
   versionFunctions: false
@@ -36,6 +36,7 @@ provider:
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/Account"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/User"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/vendorConfig"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/VendorIdUserIdMap"
     - Effect: "Allow"
       Action:
         - "sqs:GetQueueAttributes"
@@ -43,8 +44,7 @@ provider:
         - "sqs:DeleteMessage"
       Resource:
         - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-fetchq"
-        - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"
-        - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulktq"
+        - "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"<%- optionalIamSqsResources %>
     - Effect: "Allow"
       Action:
         - "sqs:SendMessage"
@@ -71,7 +71,7 @@ functions:
       - sqs:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-fetchq"
           enabled: true
-          batchSize: 1<%- bulkFetchHandler %>
+          batchSize: 1
   directTransition:
     environment:
       stage: ${self:custom.stage}
@@ -80,7 +80,7 @@ functions:
       - sqs:
           arn: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-directtq"
           enabled: true
-          batchSize: 1<%- bulkTransitionHandler %>
+          batchSize: 1<%- optionalFunctionConfigs %>
   getHttp:
     handler: handler.getHttpHandler
     events:
@@ -88,7 +88,7 @@ functions:
           path: "/http/operation/{operation}/eventType/{eventType}"
           contentType: "application/json"
           method: GET
-          cors: true        
+          cors: true
   postHttp:
     handler: handler.postHttpHandler
     events:
@@ -119,28 +119,13 @@ resources:
         QueueName: "${self:custom.config.service}-ldlq"
         ReceiveMessageWaitTimeSeconds: 0
         VisibilityTimeout: 0
-    fetchQCreate:
+    directFQCreate:
       Type: "AWS::SQS::Queue"
       Properties:
         DelaySeconds: 0
         MaximumMessageSize: 262144
         MessageRetentionPeriod: 345600
         QueueName: "${self:custom.config.service}-fetchq"
-        ReceiveMessageWaitTimeSeconds: 0
-        VisibilityTimeout: 900
-        RedrivePolicy:
-          deadLetterTargetArn:
-            Fn::GetAtt:
-              - "dlqCreate"
-              - "Arn"
-          maxReceiveCount: 2
-    bulkFQCreate:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        DelaySeconds: 0
-        MaximumMessageSize: 262144
-        MessageRetentionPeriod: 345600
-        QueueName: "${self:custom.config.service}-bulkfq"
         ReceiveMessageWaitTimeSeconds: 0
         VisibilityTimeout: 900
         RedrivePolicy:
@@ -163,22 +148,7 @@ resources:
             Fn::GetAtt:
               - "dlqCreate"
               - "Arn"
-          maxReceiveCount: 3
-    bulkQCreate:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        DelaySeconds: 0
-        MaximumMessageSize: 262144
-        MessageRetentionPeriod: 345600
-        QueueName: "${self:custom.config.service}-bulktq"
-        ReceiveMessageWaitTimeSeconds: 0
-        VisibilityTimeout: 900
-        RedrivePolicy:
-          deadLetterTargetArn:
-            Fn::GetAtt:
-              - "dlqCreate"
-              - "Arn"
-          maxReceiveCount: 10
+          maxReceiveCount: 3<%- optionalQueueCreation %>
     subscribeFSQSToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
@@ -195,21 +165,6 @@ resources:
           requestQuantity:
             - "single"
             - "exists": false
-    subscribeBFSQSToTriggerSns:
-      Type: "AWS::SNS::Subscription"
-      Properties:
-        TopicArn: "arn:aws:sns:${self:custom.region}:${self:custom.config.accountId}:event-bus"
-        Endpoint: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulkfq"
-        Protocol: sqs
-        FilterPolicy:
-          status:
-            - "trigger"
-          entityId:
-            - ${self:custom.config.productId}
-          eventType:
-            - "fetch"
-          requestQuantity:
-            - "bulk"
     subscribeDTSQSToTriggerSns:
       Type: "AWS::SNS::Subscription"
       Properties:
@@ -225,22 +180,7 @@ resources:
             - "transition"
           requestQuantity:
             - "single"
-            - "exists": false
-    subscribeBTSQSToTriggerSns:
-      Type: "AWS::SNS::Subscription"
-      Properties:
-        TopicArn: "arn:aws:sns:${self:custom.region}:${self:custom.config.accountId}:event-bus"
-        Endpoint: "arn:aws:sqs:${self:custom.region}:${self:custom.config.accountId}:${self:custom.config.service}-bulktq"
-        Protocol: sqs
-        FilterPolicy:
-          status:
-            - "trigger"
-          entityId:
-            - ${self:custom.config.productId}
-          eventType:
-            - "transition"
-          requestQuantity:
-            - "bulk"
+            - "exists": false<%- optionalQueueSubscriptions %>
     SqsQueuePolicy:
       Type: AWS::SQS::QueuePolicy
       Properties:
@@ -261,7 +201,5 @@ resources:
                           - ${self:custom.config.accountId}
                           - "event-bus"
         Queues:
-          - Ref: fetchQCreate
-          - Ref: bulkFQCreate
-          - Ref: directTQCreate
-          - Ref: bulkQCreate
+          - Ref: directFQCreate
+          - Ref: directTQCreate<%- optionalQueuePolicies %>

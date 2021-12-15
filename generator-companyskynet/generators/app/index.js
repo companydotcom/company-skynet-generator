@@ -1,347 +1,222 @@
 /* eslint-disable no-restricted-globals */
 const Generator = require('yeoman-generator');
+const fs = require('fs');
 const mkdirp = require('mkdirp');
+const {
+  confirmStart,
+  getServiceName,
+  getProductId,
+  getTileId,
+  getWhatThrottles,
+  getDayThrottleLimits,
+  getHourThrottleLimits,
+  getSecondThrottleLimits,
+  getMinuteThrottleLimits,
+  getReserveCapForDirect,
+  getSafeThrottleLimit,
+  getIsBulkFetchEnabled,
+  getIsBulkTransitionEnabled,
+  getEnableWebhook,
+  checkExisting,
+  chooseExistingMiddleware,
+  getMiddlewareName,
+} = require('./prompts');
+
+const {
+  functionConfigs,
+  resourceQueueConfigs,
+  resourceSubscriptionConfigs,
+  queueRefPolicyConfigs,
+  iamSqsResources,
+} = require('./slsConfigOptions');
+
+const {
+  generateMiddlewareIndex,
+} = require('./handleMiddleware');
 
 class skynetGenerator extends Generator {
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
-    this.fixAppName = appname => appname.replace(/\s+|_+/g, '-');
+    this.fixAppName = (appname) => appname.replace(/\s+|_+/g, '-');
 
     this.proceed = true;
-    this.hasThrottleLimits = true;
-    this.bulkTransitionHandlerEvent = `
-  bulkTransition:
-    environment:
-      stage: \${self:custom.stage}
-    handler: handler.bulkTransitionHandler
-    events:
-      - schedule: rate(5 minutes)`;
-
-    this.bulkFetchHandlerEvent = `
-  bulkFetch:
-    environment:
-      stage: \${self:custom.stage}
-    handler: handler.bulkFetchHandler
-    events:
-      - schedule: rate(5 minutes)`;
-
     this.envData = {
       region: 'us-east-1',
-      accountId: 811255529278,
-      reserveCapForDirect: 0.3,
+      accountId: 254150672415,
       retryCntForCapacity: 3,
-      safeThrottleLimit: 0.8,
     };
 
     this.doWeStart = async () => {
-      const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'start',
-          message: 'Hi. Welcome to company skynet generator. Enter \'Y\' and hit \'Return\' to continue and answer a few questions to enable me to generate the project for you.',
-          store: false,
-        },
-      ]);
+      const answer = await this.prompt([{ ...confirmStart, default: this.fixAppName(this.appname) }]);
       return answer.start;
     };
 
-
-    this.getBasicAnswers = async () => (this.prompt([
-      {
-        type: 'input',
-        name: 'service',
-        message: 'Your service name',
-        default: this.fixAppName(this.appname),
-        store: false,
-      },
-      {
-        type: 'input',
-        name: 'productId',
-        message: 'Your productId',
-        store: false,
-      },
-      {
-        type: 'input',
-        name: 'tileId',
-        message: 'Your tileId',
-        store: false,
-      },
-    ]));
-
-    const getNumericAnswer = async (ques, checkVar = 'value') => {
-      const value = await this.prompt([ques]);
-      // eslint-disable-next-line no-restricted-globals
-      return (isNaN(value[checkVar]) === false)
-        ? value : getNumericAnswer(ques, checkVar);
-    };
-
-    const getPercentageAnswer = async (ques, checkVar = 'value') => {
-      const value = await this.prompt([ques]);
-      // eslint-disable-next-line no-restricted-globals
-      return (
-        isNaN(value[checkVar]) === false
-        && value[checkVar] >= 0
-        && value[checkVar] <= 100)
-        ? value : getPercentageAnswer(ques, checkVar);
-    };
-
-    this.getThrottleLimits = async () => {
-      let throttleLmts = {};
-      const throttleOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttleOn.value === false) {
-        this.hasThrottleLimits = false;
-        return { throttleLmts };
-      }
-
-      const throttlePerDayOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per day throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerDayOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per day throttle limit  (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, day: value,
-        };
-      }
-
-      const throttlePerHourOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per hour throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerHourOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per hour throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, hour: value,
-        };
-      }
-
-      const throttlePerMinOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per minute throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerMinOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per minute throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, minute: value,
-        };
-      }
-
-      const throttlePerSecOn = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'value',
-          message: 'Does your API have any per second throttle limits?',
-          store: false,
-        },
-      ]);
-
-      if (throttlePerSecOn.value === true) {
-        const { value } = await getNumericAnswer({
-          type: 'input',
-          name: 'value',
-          message: 'What is the per second throttle limit (enter only a number)?',
-          default: 0,
-          store: false,
-        });
-        throttleLmts = {
-          ...throttleLmts, second: value,
-        };
-      }
-      return { throttleLmts };
-    };
-
-    this.getSafeLimits = async () => {
-      if (this.hasThrottleLimits === false) {
-        return {};
-      }
-      const toReturn = {};
-      const { reserveCapForDirect } = await getPercentageAnswer({
-        type: 'input',
-        name: 'reserveCapForDirect',
-        message: 'What % of capacity would you like to reserve for direct calls to the API?',
-        default: this.envData.reserveCapForDirect * 100,
-        store: false,
-      }, 'reserveCapForDirect');
-      toReturn.reserveCapForDirect = reserveCapForDirect / 100;
-
-      const { safeThrottleLimit } = await getPercentageAnswer({
-        type: 'input',
-        name: 'safeThrottleLimit',
-        message: 'What % of throttle capacity would you like to hit at the most for calls to the API?',
-        default: this.envData.safeThrottleLimit * 100,
-        store: false,
-      }, 'safeThrottleLimit');
-      toReturn.safeThrottleLimit = safeThrottleLimit / 100;
-      return toReturn;
-    };
-
-    this.isBulkTransitionEnabled = async () => {
-      const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'enabled',
-          message: 'Is your service expected to handle bulk requests for transitioning state?',
-          store: false,
-        },
-      ]);
-      return answer.enabled;
-    };
-
-    this.isBulkFetchEnabled = async () => {
-      const answer = await this.prompt([
-        {
-          type: 'confirm',
-          name: 'enabled',
-          message: 'Is your service expected to handle bulk requests for fetch events?',
-          store: false,
-        },
-      ]);
-      return answer.enabled;
-    };
-
     this.formatEnvToYml = () => ({
-      ...this.envData, throttleLmts: JSON.stringify(this.envData.throttleLmts).replace(/"/g, "'"),
+      serviceName: this.answers.service,
+      ...this.envData,
+      ...this.answers,
+      throttleLmts: JSON.stringify({
+        ...(this.answers.dayThrottleLimits ? { day: this.answers.dayThrottleLimits } : {}),
+        ...(this.answers.hourThrottleLimits ? { hour: this.answers.hourThrottleLimits } : {}),
+        ...(this.answers.minutesThrottleLimits ? { minutes: this.answers.minutesThrottleLimits } : {}),
+        ...(this.answers.secondThrottleLimits ? { second: this.answers.secondThrottleLimits } : {}),
+      }).replace(/'/g, '"'),
     });
 
+    this.getCurrentMiddlewareNames = () => {
+      const middlewareFiles = fs.readdirSync(this.destinationPath('middleware'));
+      return middlewareFiles.filter(fileName => fileName !== 'index.js').map(file => file.split('.')[0]);
+    }
+
+    this.addMiddleware = () => {
+      if (this.answers.getMiddlewareName) {
+        this.fs.copyTpl(
+          this.templatePath(
+            'middleware/template.js',
+          ),
+          this.destinationPath(`middleware/${this.answers.getMiddlewareName}.js`),
+          {
+            middlewareName: this.answers.getMiddlewareName,
+          },
+        );
+      }
+      this.fs.copyTpl(
+        this.templatePath(
+          'middleware/index.txt',
+        ),
+        this.destinationPath('middleware/index.js'), generateMiddlewareIndex([...this.getCurrentMiddlewareNames(), this.answers.getMiddlewareName], this.answers.chooseExistingMiddleware || []),
+      );
+    };
+
     this.finishProvisioning = () => {
+      const getSlsConfigOptions = (configs, answers) => {
+        let slsString = '';
+        if (answers.bulkFetch) {
+          slsString = slsString.concat(configs.bulkFetch);
+        }
+        if (answers.bulkTransition) {
+          slsString = slsString.concat(configs.bulkTransition);
+        }
+        if (answers.enableWebhook) {
+          slsString = slsString.concat(configs.webhook);
+        }
+        return slsString;
+      };
+
       if (this.proceed === false) {
         return;
       }
-      this.log(JSON.stringify(this.envData, null, 4));
-      this.fs.copy(
-        this.templatePath('workers/fetchWorker.js'),
-        this.destinationPath('workers/fetchWorker.js'),
-      );
+      this.fs.copy(this.templatePath('workers/fetchWorker.js'), this.destinationPath('workers/fetchWorker.js'));
       this.fs.copy(
         this.templatePath('workers/transitionWorker.js'),
         this.destinationPath('workers/transitionWorker.js'),
       );
-      this.fs.copy(
-        this.templatePath('workers/preWorkerHook.js'),
-        this.destinationPath('workers/preWorkerHook.js'),
-      );
-      this.fs.copy(
-        this.templatePath('database.config.json'),
-        this.destinationPath('database.config.json'),
-      );
-      this.fs.copy(
-        this.templatePath('handler.js'),
-        this.destinationPath('handler.js'),
-      );
-      this.fs.copy(
-        this.templatePath('webpack.config.js'),
-        this.destinationPath('webpack.config.js'),
-      );
-      this.fs.copy(
-        this.templatePath('.eslintrc'),
-        this.destinationPath('.eslintrc'),
-      );
-      this.fs.copy(
-        this.templatePath('.gitignore'),
-        this.destinationPath('.gitignore'),
-      );
-      this.fs.copy(
-        this.templatePath('README.md'),
-        this.destinationPath('README.md'),
+      this.fs.copy(this.templatePath('database.config.json'), this.destinationPath('database.config.json'));
+      this.fs.copyTpl(this.templatePath('handler.js'), this.destinationPath('handler.js'), { throttlingOn: this.answers.whichThrottle && this.answers.whichThrottle.length !== 0 ? true : false });
+      this.fs.copy(this.templatePath('webpack.config.js'), this.destinationPath('webpack.config.js'));
+      this.fs.copy(this.templatePath('.eslintrc.js'), this.destinationPath('.eslintrc.js'));
+      this.fs.copy(this.templatePath('.gitignore'), this.destinationPath('.gitignore'));
+      this.fs.copy(this.templatePath('README.md'), this.destinationPath('README.md'));
+      this.fs.copyTpl(this.templatePath('package.json'), this.destinationPath('package.json'), {
+        appName: this.answers.service,
+      });
+      this.fs.copyTpl(this.templatePath('env.yml'), this.destinationPath('env.yml'), this.formatEnvToYml());
+      this.fs.copyTpl(this.templatePath('serverless.yml'), this.destinationPath('serverless.yml'), {
+        serviceName: this.answers.service,
+        optionalIamSqsResources: getSlsConfigOptions(iamSqsResources, this.answers),
+        optionalFunctionConfigs: getSlsConfigOptions(functionConfigs, this.answers),
+        optionalQueueCreation: getSlsConfigOptions(resourceQueueConfigs, this.answers),
+        optionalQueueSubscriptions: getSlsConfigOptions(resourceSubscriptionConfigs, this.answers),
+        optionalQueuePolicies: getSlsConfigOptions(queueRefPolicyConfigs, this.answers),
+      });
+      this.fs.copyTpl(
+        this.templatePath('tests/sampleMessage.json'),
+        this.destinationPath('tests/sampleMessage.json'),
+        this.answers,
       );
       this.fs.copyTpl(
-        this.templatePath('package.json'),
-        this.destinationPath('package.json'),
-        { appName: this.envData.service },
+        this.templatePath('.vscode/launch.json'),
+        this.destinationPath('.vscode/launch.json'),
+        this.answers,
       );
-      this.fs.copyTpl(
-        this.templatePath('env.yml'),
-        this.destinationPath('env.yml'),
-        this.formatEnvToYml(),
-      );
-      this.fs.copyTpl(
-        this.templatePath('serverless.yml'),
-        this.destinationPath('serverless.yml'),
-        {
-          serviceName: this.envData.service,
-          bulkTransitionHandler: this.bulkTransitionHandlerEvent,
-          bulkFetchHandler: this.bulkFetchHandlerEvent,
-        },
-      );
-      mkdirp.sync(`${this.destinationRoot()}/tests`);
       mkdirp.sync(`${this.destinationRoot()}/services`);
+      this.fs.copyTpl(
+        this.templatePath(
+          this.answers.enableWebhook ? 'workers/webhookWorker-enabled.js' : 'workers/webhookWorker-disabled.js',
+        ),
+        this.destinationPath('workers/webhookWorker.js'),
+      );
+      mkdirp.sync(`${this.destinationRoot()}/middleware`);
+      this.fs.copyTpl(
+        this.templatePath(
+          'middleware/index.txt',
+        ),
+        this.destinationPath('middleware/index.js'), generateMiddlewareIndex(this.getCurrentMiddlewareNames(), this.answers.chooseExistingMiddleware || []),
+      );
     };
   }
 }
 
 module.exports = class extends skynetGenerator {
   async prompting() {
-    if (await this.doWeStart() === false) {
-      this.proceed = false;
-      return null;
-    }
+    const preExistingService = fs.existsSync(this.destinationPath('package.json'));
 
-    this.envData = {
-      ...this.envData,
-      ...await this.getBasicAnswers(),
-      ...await this.getThrottleLimits(),
-      ...await this.getSafeLimits(),
-    };
+    this.startUp = await this.prompt(preExistingService ? [
+      confirmStart,
+      checkExisting,
+    ] : [confirmStart]);
 
-    if (await this.isBulkTransitionEnabled() === false) {
-      this.bulkTransitionHandlerEvent = '';
+    if (this.startUp.start) {
+      if (!preExistingService || this.startUp.generateFullService === 'Generate Full Service') {
+        this.type = 'fullService';
+        this.answers = await this.prompt([
+          { ...getServiceName, default: this.fixAppName(this.appname) },
+          getProductId,
+          getTileId,
+          getWhatThrottles,
+          getDayThrottleLimits,
+          getHourThrottleLimits,
+          getMinuteThrottleLimits,
+          getSecondThrottleLimits,
+          getIsBulkFetchEnabled,
+          getIsBulkTransitionEnabled,
+          getReserveCapForDirect,
+          getSafeThrottleLimit,
+          getEnableWebhook,
+          chooseExistingMiddleware,
+        ]);
+        this.answers.safeThrottleLimit = this.answers.safeThrottleLimit ? this.answers.safeThrottleLimit / 100 : 0.8;
+        this.answers.reserveCapForDirect = this.answers.reserveCapForDirect ? this.answers.reserveCapForDirect / 100 : 0.3;
+      } else if (this.startUp.generateFullService === 'Add Custom Middleware') {
+        this.type = 'middleware';
+        this.answers = await this.prompt([
+          chooseExistingMiddleware,
+          getMiddlewareName,
+        ]);
+      }
+    } else {
+      this.type = 'none';
     }
-
-    if (await this.isBulkFetchEnabled() === false) {
-      this.bulkFetchHandlerEvent = '';
-    }
-    return true;
   }
+
 
   writing() {
-    this.finishProvisioning();
+    switch(this.type) {
+      case 'fullService':
+        this.finishProvisioning();
+        break;
+      case 'middleware':
+        this.addMiddleware();
+        break;
+      default:
+        break;
+    }
   }
 
-  install() {
-    if (this.proceed !== false) {
-      this.npmInstall();
-    }
+  end() {
+    this.log(
+      'Your service is now generated, please read the included README.md and comments for instructions on how to get started.',
+    );
   }
 };

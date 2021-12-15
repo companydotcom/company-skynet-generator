@@ -1,7 +1,9 @@
 # company-skynet-generator
+
 Company.com Skynet Service Generator
 
 To get started:
+
 1. run 'sudo npm i -g yo' from any folder on the terminal.
 2. cd into the folder 'generator-companyskynet'
 3. run 'sudo npm link'.
