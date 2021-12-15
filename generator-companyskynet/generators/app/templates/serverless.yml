@@ -20,10 +20,10 @@ custom:
 ########## PROVIDER CONFIGURATION ##########
 provider:
   name: aws
-  runtime: nodejs10.x
-  stage: dev
+  runtime: nodejs14.x
+  stage: plat
   region: us-east-1
-  accountId: 811255529278
+  accountId: 254150672415
   environment: ${self:custom.config}
   timeout: 900
   versionFunctions: false

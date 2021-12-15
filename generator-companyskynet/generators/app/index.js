@@ -43,7 +43,7 @@ class skynetGenerator extends Generator {
     this.proceed = true;
     this.envData = {
       region: 'us-east-1',
-      accountId: 811255529278,
+      accountId: 254150672415,
       retryCntForCapacity: 3,
     };
 
@@ -61,7 +61,7 @@ class skynetGenerator extends Generator {
         ...(this.answers.hourThrottleLimits ? { hour: this.answers.hourThrottleLimits } : {}),
         ...(this.answers.minutesThrottleLimits ? { minutes: this.answers.minutesThrottleLimits } : {}),
         ...(this.answers.secondThrottleLimits ? { second: this.answers.secondThrottleLimits } : {}),
-      }).replace(/"/g, "'"),
+      }).replace(/'/g, '"'),
     });
 
     this.getCurrentMiddlewareNames = () => {

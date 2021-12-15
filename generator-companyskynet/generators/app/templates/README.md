@@ -187,3 +187,10 @@ Message attributes that will be delivered to the worker:
     crmData: {}, // crm data is used to pass custom data directly to Salesforce or other configured crm providers.  Add key only if required.  Triggers skynet-core to send a crm event on event-bus with this data as the payload
 }
 ```
+
+
+
+## Testing things right away
+
+For VS Code debug, we have a health handler configured to work through the debug mode in VS. However, there is one change you will need to do in
+/tests/sampleMessage.json. Open the file, replace 'dummy' with real existing values for user and account in lines 46, 47 and 50.

@@ -5,14 +5,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Lambda",
       "type": "node",
+      "console": "integratedTerminal",
       "request": "launch",
-      "runtimeArgs": ["--inspect", "--debug-port=9229"],
-      "program": "${workspaceFolder}/node_modules/serverless/bin/serverless",
-      "args": ["offline"],
-      "port": 9229,
-      "console": "integratedTerminal"
+      "name": "SAMPLE INVOKE",
+      "program": "${workspaceFolder}/node_modules/.bin/sls",
+      "args": ["invoke", "local", "-f", "fetch", "--path", "tests/sampleMessage.json"]
     },
     {
       "type": "node",
@@ -20,14 +18,6 @@
       "name": "setupDatabase",
       "program": "${workspaceFolder}/node_modules/.bin/sls",
       "args": ["invoke", "local", "-f", "setupDatabase", "--path", "database.config.json"]
-    },
-    {
-      "type": "node",
-      "console": "integratedTerminal",
-      "request": "launch",
-      "name": "SAMPLE INVOKE",
-      "program": "${workspaceFolder}/node_modules/.bin/sls",
-      "args": ["invoke", "local", "-f", "LAMBDA NAME HERE", "--path", "tests/sampleMessage.json"]
     }
   ]
 }
