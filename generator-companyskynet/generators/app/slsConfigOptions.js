@@ -53,7 +53,7 @@ const resourceQueueConfigs = {
               - "Arn"
           maxReceiveCount: 2`,
   bulkTransition: `
-    bulkQCreate:
+    bulkTQCreate:
       Type: "AWS::SQS::Queue"
       Properties:
         DelaySeconds: 0
