@@ -37,6 +37,8 @@ provider:
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/User"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/vendorConfig"
         - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/VendorIdUserIdMap"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/user-mads"
+        - "arn:aws:dynamodb:${self:custom.region}:${self:custom.config.accountId}:table/account-mads"
     - Effect: "Allow"
       Action:
         - "sqs:GetQueueAttributes"
