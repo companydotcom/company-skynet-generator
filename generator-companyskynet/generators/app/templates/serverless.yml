@@ -2,6 +2,7 @@ service: <%- serviceName %>
 
 plugins:
   - serverless-webpack
+  - serverless-plugin-tracing
 
 package:
   individually: true
