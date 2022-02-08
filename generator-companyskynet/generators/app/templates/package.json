@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.167.0",
+    "aws-xray-sdk": "^3.3.4",
     "company-core": "^1.5.0",
     "@companydotcom/company-skynet-core": "^2.0.7",
     "s": "^1.0.0",
