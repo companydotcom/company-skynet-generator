@@ -2,6 +2,7 @@ service: <%- serviceName %>
 
 plugins:
   - serverless-webpack
+  - serverless-plugin-tracing
 
 package:
   individually: true
@@ -27,7 +28,15 @@ provider:
   environment: ${self:custom.config}
   timeout: 900
   versionFunctions: false
+  tracing:
+    apiGateway: true
+    lambda: true
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
